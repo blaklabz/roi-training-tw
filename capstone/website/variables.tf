@@ -22,3 +22,8 @@ variable "availability_zones" {
   description = "List of availability zones for the public subnets"
   type        = list(string)
 }
+
+variable "ami_id" {
+  description = "AMI ID for the EC2 instance"
+  type        = string
+}
