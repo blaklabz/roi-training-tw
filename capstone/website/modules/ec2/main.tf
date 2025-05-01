@@ -12,7 +12,7 @@ resource "aws_instance" "web_server" {
               cd /usr/share/nginx/html
 
               # Download index.html
-              curl -O https://raw.githubusercontent.com/blaklabz/roi-training-tw/main/index.html
+              curl -O https://raw.githubusercontent.com/blaklabz/roi-training-tw/main/capstone/website/index.html
 
               # Download Galaga image
               curl -o galaga.png https://raw.githubusercontent.com/blaklabz/roi-training-tw/main/capstone/website/images/galaga.png
