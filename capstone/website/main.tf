@@ -27,3 +27,13 @@ module "ec2" {
   security_group_id = module.security_group.sg_id
   instance_name     = "capstone-ec2"
 }
+
+module "alb" {
+  source = "./modules/alb"
+
+  alb_name          = "capstone-alb"
+  subnet_ids        = module.vpc.public_subnet_ids
+  security_group_id = module.security_group.sg_id
+  vpc_id            = module.vpc.vpc_id
+  instance_id       = module.ec2.instance_id
+}
