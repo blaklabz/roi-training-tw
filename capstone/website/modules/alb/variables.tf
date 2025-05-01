@@ -18,7 +18,9 @@ variable "vpc_id" {
   type        = string
 }
 
+/*
 variable "instance_id" {
   description = "ID of the EC2 instance to register"
   type        = string
 }
+*/
