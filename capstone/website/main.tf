@@ -3,8 +3,7 @@ provider "aws" {
 }
 
 module "vpc" {
-  source = "./modules/vpc"
-
+  source              = "./modules/vpc"
   vpc_cidr            = var.vpc_cidr
   vpc_name            = var.vpc_name
   public_subnet_cidrs = var.public_subnet_cidrs
@@ -12,8 +11,7 @@ module "vpc" {
 }
 
 module "security_group" {
-  source = "./modules/security_group"
-
+  source  = "./modules/security_group"
   vpc_id  = module.vpc.vpc_id
   sg_name = "capstone-web-sg"
 }
@@ -21,7 +19,6 @@ module "security_group" {
 /* this can be used instead of asg if wanted
 module "ec2" {
   source = "./modules/ec2"
-
   ami_id            = var.ami_id
   instance_type     = "t2.micro"
   subnet_id         = module.vpc.public_subnet_ids[0]
@@ -31,8 +28,7 @@ module "ec2" {
 */
 
 module "alb" {
-  source = "./modules/alb"
-
+  source            = "./modules/alb"
   alb_name          = "capstone-alb"
   subnet_ids        = module.vpc.public_subnet_ids
   security_group_id = module.security_group.sg_id
