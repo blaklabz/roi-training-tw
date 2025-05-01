@@ -8,7 +8,7 @@ packer {
 }
 
 source "amazon-ebs" "nginx_capstone" {
-  region                 = "us-east-2"
+  region                 = "us-east-1"
   source_ami_filter {
     filters = {
       name                = "amzn2-ami-hvm-*-x86_64-gp2"
