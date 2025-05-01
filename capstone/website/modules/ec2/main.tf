@@ -8,6 +8,15 @@ resource "aws_instance" "web_server" {
   user_data = <<-EOF
               #!/bin/bash
               sudo yum update -y
+              sudo rm -rf /usr/share/nginx/html/*
+              cd /usr/share/nginx/html
+
+              # Download index.html
+              curl -O https://raw.githubusercontent.com/blaklabz/roi-training-tw/main/index.html
+
+              # Download Galaga image
+              curl -o galaga.png https://raw.githubusercontent.com/blaklabz/roi-training-tw/main/capstone/website/images/galaga.png
+              sudo systemctl restart nginx
               EOF
 
   tags = {
