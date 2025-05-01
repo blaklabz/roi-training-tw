@@ -2,7 +2,7 @@
 This capstone project has been fun for me and I really enjoy being able to solve a problem multiple different ways. This readme will cover how I created the environment and what is needed to execute the code.
 
 ### **capstone-mgt-srv**
-This management node was created manually in ***us-east-2*** as ***i-0b33e27c06f8de3b3*** and has both Terraform and Packer installed. This node is connected to the following github **repo:**
+This management node was created manually in ***us-east-2*** as ***capstone-mgt-srv*** and has both Terraform and Packer installed. This node is connected to the following github **repo:**
 *https://github.com/blaklabz/roi-training-tw.git*
 
 ### **running packer on capstone-mgt-srv**
