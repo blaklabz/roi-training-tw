@@ -13,11 +13,13 @@ resource "aws_lb" "web_alb" {
 
 resource "aws_lb_target_group" "web_tg" {
   name     = "${var.alb_name}-tg"
-  port     = 80
-  protocol = "HTTP"
+  port     = 443
+  protocol = "HTTPS"
   vpc_id   = var.vpc_id
 
   health_check {
+    protocol            = "HTTPS"
+    port                = "443"
     path                = "/"
     interval            = 30
     timeout             = 5
@@ -30,7 +32,7 @@ resource "aws_lb_target_group" "web_tg" {
 resource "aws_lb_listener" "http_listener" {
   load_balancer_arn = aws_lb.web_alb.arn
   port              = 80
-  protocol          = "HTTP"
+  protocol          = "HTTPS"
 
   default_action {
     type             = "forward"
@@ -41,5 +43,5 @@ resource "aws_lb_listener" "http_listener" {
 resource "aws_lb_target_group_attachment" "ec2_attach" {
   target_group_arn = aws_lb_target_group.web_tg.arn
   target_id        = var.instance_id
-  port             = 80
+  port             = 443
 }
