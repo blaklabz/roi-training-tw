@@ -37,14 +37,13 @@ module "alb" {
   subnet_ids        = module.vpc.public_subnet_ids
   security_group_id = module.security_group.sg_id
   vpc_id            = module.vpc.vpc_id
-  instance_id       = module.ec2.instance_id
 }
 
 module "asg" {
   source            = "./modules/asg"
   ami_id            = var.ami_id
   instance_type     = var.instance_type
-  security_group_id = module.sg.web_sg_id
+  security_group_id = module.security_group.sg_id
   subnet_ids        = module.vpc.public_subnet_ids
   target_group_arn  = module.alb.target_group_arn
 }
