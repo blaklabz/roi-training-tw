@@ -40,8 +40,10 @@ resource "aws_lb_listener" "http_listener" {
   }
 }
 
+/* used for ec2
 resource "aws_lb_target_group_attachment" "ec2_attach" {
   target_group_arn = aws_lb_target_group.web_tg.arn
   target_id        = var.instance_id
   port             = 443
 }
+*/
