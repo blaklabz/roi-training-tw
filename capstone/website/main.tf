@@ -18,6 +18,7 @@ module "security_group" {
   sg_name = "capstone-web-sg"
 }
 
+/* this can be used instead of asg if wanted
 module "ec2" {
   source = "./modules/ec2"
 
@@ -27,6 +28,7 @@ module "ec2" {
   security_group_id = module.security_group.sg_id
   instance_name     = "capstone-ec2"
 }
+*/
 
 module "alb" {
   source = "./modules/alb"
