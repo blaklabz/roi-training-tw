@@ -72,7 +72,7 @@ grafana:
         - name: Prometheus
           type: prometheus
           access: proxy
-          url: http://prometheus-server.default.svc.cluster.local
+          url: http://capstone-prometheus-server.default.svc.cluster.local
           isDefault: true
 
 prometheus:
