@@ -1,33 +1,32 @@
-# Description - roi-training-tw
-This capstone project has been fun for me and I really enjoy being able to solve a problem multiple different ways. This readme will cover how I created the environment and what is needed to execute the code.
+# ROI Training Capstone
 
-### **capstone-mgt-srv**
-This management node was created manually in ***us-east-2*** as ***capstone-mgt-srv*** and has both Terraform and Packer installed. This node is connected to the following github **repo:**
-*https://github.com/blaklabz/roi-training-tw.git*
+Welcome to the **ROI Training Capstone Project**, a hands-on DevOps training environment built to simulate real-world infrastructure and deployment challenges.
 
-### **running packer on capstone-mgt-srv**
-inside /roi-training-tw/capstone/packer-code/ resides the packer build file.
+This repository contains all components necessary to build and manage a modern cloud-native microservices stack using:
 
-the build file is called packer-nginx-https2.pkr.hcl
+- 🐳 Docker + Kubernetes
+- 📈 Grafana + Prometheus monitoring
+- 🛠️ Helm + Infrastructure as Code (IaC)
+- 🧩 Istio for advanced traffic routing (blue/green deployment)
+- 🗃️ MariaDB for persistent state
 
-to run this file: packer build packer-nginx-https2.pkr.hcl
+---
 
-**note:** *this image is prebuilt with nginx set with a reverse proxy*
-
-### **running simple_vm terraform project on capstone-mgt-srv**
-
-inside /roi-training-tw/capstone/simple_vm/ resides the ec2 build files
-
-to run this terraform project: terraform apply -auto-approve
-
-**note:** *this build out attempts to set the salt-minion but i had some trouble getting to the salt repo but i wanted to leave this here to show the attempt to get orchestration prebuilt into the ec2. However, this ec2 should
-display a default nginx page when queried.*
-
-### **running website terraform project on capstone-mgt-srv**
-
-inside /roi-training-tw/capstone/website/ resides the modular terraform build out.
-
-to run this terraform project: terraform apply -auto-approve
-
-**note:** *This build out creates an alb, asg, security_group, and the vpc. This project is triggered at the root
-level, taking advantage of the modules to enable exactly what I performed in this example.  I initially built this out ommiting the ASG, and useing the ec2 module. But because of the structure of methodology, I was quickly able to build out the ASG and tie in its module to perform this build out. If you get bored one day you can see the commit tree where i make this change to add the ASG and fix its bugs while leaving the rest of the project intact. On top of this, this build out leans on the nginx that was prebuilt in to the AMI.  Instead of a game I decided to be a bit creative and create a static page within nginx for it to display and used user_data to implement this update to the default nginx page that will be displayed.*
+## 📂 Repository Structure
+* roi-training-tw/
+  * 01-terraform-capstone
+     * packer-code
+     * simple_vm
+     * website
+     * README.md
+  * 02-kubernetes-capstone
+     * capstone-chart - (helm chart)
+     * events-api
+     * events-api-v2
+     * events-website
+     * events-website-v2
+     * build_ecr.sh   - (creates the repo and builds and pushes images to ecr)
+     * build_local.sh - (an attempt at creating a repo in kubernetes to push too)
+     * cluster.yaml
+     * README.md
+* README.md                # You’re here!!!
