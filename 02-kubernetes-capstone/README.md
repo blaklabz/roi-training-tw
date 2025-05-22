@@ -35,7 +35,14 @@ cd /home/ec2-user/eksctlcluster
 # run the command to build the eks cluster
 eksctl create cluster -f cluster.yaml
 
-# wait for the cluster to build then navigate to the capstone chart directory
+# when the cluster has built, install istio
+cd /home/ec2-user/k8s-capstone/istio-1.26.0
+istioctl install --set profile=demo -y
+
+# now patch the storage class
+kubectl patch storageclass gp2 -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
+
+# navigate to the capstone chart directory
 cd /home/ec2-user/k8s-capstone/roi-training-tw/02-kubernetes-capstone/capstone-chart/
 
 # install the capstone helm chart
@@ -46,7 +53,7 @@ helm install capstone .
 kubectl get svc -n istio-system - # this will give you the web app's service endpoint
  # ***note*** - the initial page should show as busted and not working
 
-kubectly get svc - # this will give you the grafana service endpoint
+kubectl get svc - # this will give you the grafana service endpoint
  # ***note*** - the password is set to admin/admin it will force you to set a new password
  # Once in grafana navigate to dashboards review the General Folder entries
     # Kubernetes Pod metrics
@@ -56,11 +63,25 @@ kubectly get svc - # this will give you the grafana service endpoint
 vi /home/ec2-user/k8s-capstone/roi-training-tw/02-kubernetes-capstone/capstone-chart/values.yaml
 
 # modify the v1/v2 values
-#   to mimic canary - set v2 to 25 and v1 to 75
-#   to mimic blue/green - set v1 100 to v2 100 and v1 to 0
 
-# after the modifications update the Chart
+#  to mimic canary - set v2 to 25 and v1 to 75
+#  after the modifications update the Chart
 helm upgrade capstone .
+
+# refresh the page for the webapp
+
+#  to mimic blue/green - set v1 100 to v2 100 and v1 to 0
+#  after the modifications update the Chart
+helm upgrade capstone .
+
+# refresh the page for the webapp - the website should show the modified page and working forms
+
+🧹 Clean up
+cd /home/ec2-user/k8s-capstone/roi-training-tw/02-kubernetes-capstone/capstone-chart/
+helm uninstall capstone .
+
+cd /home/ec2-user/eksctlcluster
+eksctl delete cluster -f cluster.yaml
 ___
 
 📦 Fresh Start Installation
