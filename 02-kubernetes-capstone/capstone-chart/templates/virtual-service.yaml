@@ -10,13 +10,13 @@ spec:
   http:
     - route:
         - destination:
-            host: {{ .Chart.Name }}-web
+            host: {{ .Chart.Name }}-web-v1
             subset: v1
             port:
               number: 8080
           weight: {{ .Values.istio.weight.v1 }}
         - destination:
-            host: {{ .Chart.Name }}-web
+            host: {{ .Chart.Name }}-web-v2
             subset: v2
             port:
               number: 8080
