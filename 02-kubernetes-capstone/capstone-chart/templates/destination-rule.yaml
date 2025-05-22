@@ -7,7 +7,7 @@ spec:
   subsets:
     - name: v1
       labels:
-        app: {{ .Chart.Name }}-web-v1
+        app: {{ .Chart.Name }}-web
     - name: v2
       labels:
-        app: {{ .Chart.Name }}-web-v2
+        app: {{ .Chart.Name }}-web
