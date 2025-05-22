@@ -23,8 +23,11 @@ for repo in $API_REPO $WEB_REPO; do
     echo "✅ ECR repository '$repo' exists."
   else
     echo "🚀 Creating ECR repository '$repo'..."
-    aws ecr create-repository --repository-name $repo --region $REGION 2>/dev/null || \
-      echo "⚠️ Repo '$repo' already exists, skipping..."
+    if aws ecr create-repository --repository-name $repo --region $REGION > /dev/null 2>&1; then
+      echo "✅ Created ECR repository '$repo'."
+    else
+      echo "⚠️ Repo '$repo' may already exist or creation failed. Skipping..."
+    fi
   fi
 done
 
