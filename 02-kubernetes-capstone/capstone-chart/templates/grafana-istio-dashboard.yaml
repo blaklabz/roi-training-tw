@@ -3,7 +3,7 @@ kind: ConfigMap
 metadata:
   name: grafana-istio-dashboard
   labels:
-    grafana_dashboard: "2"
+    grafana_dashboard: "1"
 data:
   istio-dashboard.json: |
     {{- .Files.Get "dashboards/istio-dashboard.json" | nindent 4 }}
