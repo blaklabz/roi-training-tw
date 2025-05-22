@@ -11,11 +11,13 @@ spec:
     - route:
         - destination:
             host: {{ .Chart.Name }}-web
+            subset: v1
             port:
               number: 8080
-          weight: 50
+          weight: {{ .Values.istio.weight.v1 }}
         - destination:
-            host: {{ .Chart.Name }}-web-v2
+            host: {{ .Chart.Name }}-web
+            subset: v2
             port:
               number: 8080
-          weight: 50
+          weight: {{ .Values.istio.weight.v2 }}

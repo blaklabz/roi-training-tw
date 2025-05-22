@@ -31,3 +31,8 @@ mariadb:
   user: eventsuser
   password: eventspass
   storageClassName: gp2
+
+istio:
+  weight:
+    v1: 100
+    v2: 0
