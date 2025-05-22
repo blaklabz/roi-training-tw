@@ -4,7 +4,8 @@ metadata:
   name: {{ .Chart.Name }}-web-v2
 spec:
   selector:
-    app: {{ .Chart.Name }}-web-v2
+    app: {{ .Chart.Name }}-web
+    version: v2
   ports:
     - port: {{ .Values.service.webPort }}
       targetPort: {{ .Values.service.webPort }}
