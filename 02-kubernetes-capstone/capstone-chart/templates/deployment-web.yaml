@@ -1,16 +1,16 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Chart.Name }}-web
+  name: {{ .Chart.Name }}-web-v1
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-web
+      app: {{ .Chart.Name }}-web-v1
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-web
+        app: {{ .Chart.Name }}-web-v1
     spec:
       containers:
         - name: {{ .Values.image.web.name }}

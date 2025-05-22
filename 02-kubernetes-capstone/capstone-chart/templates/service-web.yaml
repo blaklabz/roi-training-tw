@@ -1,11 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ .Chart.Name }}-web
+  name: {{ .Chart.Name }}-web-v1
 spec:
   type: {{ .Values.service.type }}
   selector:
-    app: {{ .Chart.Name }}-web
+    app: {{ .Chart.Name }}-web-v1
   ports:
     - protocol: TCP
       port: {{ .Values.service.webPort }}

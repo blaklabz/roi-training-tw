@@ -1,13 +1,13 @@
 replicaCount: 1
 
 image:
-  repository: 172.16.0.139:32000
+  repository: 906328874067.dkr.ecr.us-east-2.amazonaws.com
   api:
-    name: events-api
+    name: capstone-api
     v1tag: v1.0
     v2tag: v2.0
   web:
-    name: events-website
+    name: capstone-web
     v1tag: v1.0
     v2tag: v2.0
 
