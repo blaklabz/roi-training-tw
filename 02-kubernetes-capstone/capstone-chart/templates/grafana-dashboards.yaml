@@ -1,38 +1,9 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: grafana-dashboards
+  name: grafana-pod-dashboard
   labels:
     grafana_dashboard: "1"
 data:
-  k8s-pods.json: >
-    {{- toJson (dict
-      "annotations" (dict "list" (list (dict "builtIn" 1 "type" "dashboard")))
-      "title" "Kubernetes Pod Metrics"
-      "uid" "k8s-pods"
-      "version" 1
-      "schemaVersion" 16
-      "panels" (list
-        (dict
-          "datasource" "Prometheus"
-          "type" "graph"
-          "title" "Pod CPU Usage"
-          "targets" (list (dict
-            "expr" "sum(rate(container_cpu_usage_seconds_total{image!='',container!='POD'}[5m])) by (pod)"
-            "legendFormat" "{{`{{pod}}`}}"
-          ))
-          "gridPos" (dict "h" 8 "w" 24 "x" 0 "y" 0)
-        )
-        (dict
-          "datasource" "Prometheus"
-          "type" "graph"
-          "title" "Pod Memory Usage"
-          "targets" (list (dict
-            "expr" "sum(container_memory_usage_bytes{image!='',container!='POD'}) by (pod)"
-            "legendFormat" "{{`{{pod}}`}}"
-          ))
-          "gridPos" (dict "h" 8 "w" 24 "x" 0 "y" 9)
-        )
-      )
-      "time" (dict "from" "now-1h" "to" "now")
-    ) }}
+  istio-dashboard.json: |
+    {{- .Files.Get "dashboards/pod-dashboard.json" | nindent 4 }}
