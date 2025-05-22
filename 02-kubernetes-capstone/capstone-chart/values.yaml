@@ -51,11 +51,12 @@ grafana:
     dashboards:
       enabled: true
       label: grafana_dashboard
-      folder: /var/lib/grafana/dashboards
       searchNamespace: ALL
       configMaps:
-        default: grafana-dashboards
+        pods: grafana-pod-dashboards
         istio: grafana-istio-dashboard
+      folderAnnotation: ""
+      folder: /var/lib/grafana/dashboards
   datasources:
     datasources.yaml:
       apiVersion: 1
@@ -70,14 +71,22 @@ dashboardProviders:
   dashboardproviders.yaml:
     apiVersion: 1
     providers:
-      - name: "default"
+      - name: "pods"
         orgId: 1
-        folder: ""
+        folder: "General"
         type: file
         disableDeletion: false
         editable: true
         options:
-          path: /var/lib/grafana/dashboards
+          path: /var/lib/grafana/dashboards/pods
+      - name: "istio"
+        orgId: 1
+        folder: "General"
+        type: file
+        disableDeletion: false
+        editable: true
+        options:
+          path: /var/lib/grafana/dashboards/istio
 
 prometheus:
   server:

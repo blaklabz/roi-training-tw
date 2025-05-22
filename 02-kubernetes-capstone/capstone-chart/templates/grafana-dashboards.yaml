@@ -4,6 +4,8 @@ metadata:
   name: grafana-pod-dashboard
   labels:
     grafana_dashboard: "1"
+  annotations:
+    k8s-sidecar-target-directory: /var/lib/grafana/dashboards/pods
 data:
   istio-dashboard.json: |
     {{- .Files.Get "dashboards/pod-dashboard.json" | nindent 4 }}
