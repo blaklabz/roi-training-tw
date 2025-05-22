@@ -18,11 +18,13 @@ aws ecr get-login-password --region $REGION | docker login --username AWS --pass
 echo "📦 Ensuring ECR repositories exist..."
 
 for repo in $API_REPO $WEB_REPO; do
+  echo "📦 Checking repo '$repo'..."
   if aws ecr describe-repositories --repository-names $repo --region $REGION > /dev/null 2>&1; then
     echo "✅ ECR repository '$repo' exists."
   else
     echo "🚀 Creating ECR repository '$repo'..."
-    aws ecr create-repository --repository-name $repo --region $REGION
+    aws ecr create-repository --repository-name $repo --region $REGION 2>/dev/null || \
+      echo "⚠️ Repo '$repo' already exists, skipping..."
   fi
 done
 
