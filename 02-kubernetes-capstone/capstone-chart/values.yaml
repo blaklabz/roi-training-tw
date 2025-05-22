@@ -30,3 +30,4 @@ mariadb:
   dbName: events
   user: eventsuser
   password: eventspass
+  storageClassName: gp2
