@@ -15,7 +15,7 @@ spec:
         version: v1
     spec:
       containers:
-        - name: {{ .Values.image.web.name }}
+        - name: {{ .Values.image.web.name }}-v1
           image: "{{ .Values.image.repository }}/{{ .Values.image.web.name }}:{{ .Values.image.web.v1tag }}"
           ports:
             - containerPort: {{ .Values.service.webPort }}
