@@ -12,7 +12,7 @@ image:
     v2tag: v2.0
 
 service:
-  type: NodePort
+  type: ClusterIP
   apiPort: 8082
   webPort: 8080
 
