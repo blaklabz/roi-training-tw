@@ -10,7 +10,8 @@ spec:
   template:
     metadata:
       labels:
-        app: {{ .Chart.Name }}-web-v2
+        app: {{ .Chart.Name }}-web
+        version: v2
     spec:
       containers:
         - name: {{ .Values.image.web.name }}-v2
