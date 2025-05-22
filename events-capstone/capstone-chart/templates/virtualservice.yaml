@@ -1,0 +1,21 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: {{ .Chart.Name }}-vs
+spec:
+  hosts:
+    - "*"
+  gateways:
+    - {{ .Chart.Name }}-gateway
+  http:
+    - route:
+        - destination:
+            host: {{ .Chart.Name }}-web
+            port:
+              number: 8080
+          weight: 50
+        - destination:
+            host: {{ .Chart.Name }}-web-v2
+            port:
+              number: 8080
+          weight: 50

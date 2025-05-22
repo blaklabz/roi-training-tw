@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-web-v2
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-web-v2
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-web-v2
+    spec:
+      containers:
+        - name: {{ .Values.image.web.name }}-v2
+          image: "{{ .Values.image.repository }}/{{ .Values.image.web.name }}:{{ .Values.image.web.v2tag }}"
+          ports:
+            - containerPort: {{ .Values.service.webPort }}
+          env:
+            - name: SERVER
+              value: "http://{{ .Chart.Name }}-api-v2:{{ .Values.service.apiPort }}"

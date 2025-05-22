@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-web
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-web
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-web
+    spec:
+      containers:
+        - name: {{ .Values.image.web.name }}
+          image: "{{ .Values.image.repository }}/{{ .Values.image.web.name }}:{{ .Values.image.web.v1tag }}"
+          ports:
+            - containerPort: {{ .Values.service.webPort }}
+          env:
+            - name: SERVER
+              value: "http://{{ .Chart.Name }}-api:{{ .Values.service.apiPort }}"
+          resources:
+            limits:
+              cpu: {{ .Values.resources.limits.cpu }}
+              memory: {{ .Values.resources.limits.memory }}
+            requests:
+              cpu: {{ .Values.resources.requests.cpu }}
+              memory: {{ .Values.resources.requests.memory }}

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}-api-v2
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}-api-v2
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}-api-v2
+    spec:
+      containers:
+        - name: {{ .Values.image.api.name }}-v2
+          image: "{{ .Values.image.repository }}/{{ .Values.image.api.name }}:{{ .Values.image.api.v2tag }}"
+          ports:
+            - containerPort: {{ .Values.service.apiPort }}
+          env:
+            - name: DB_HOST
+              value: "{{ .Chart.Name }}-mariadb"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "{{ .Values.mariadb.dbName }}"
+            - name: DB_USER
+              value: "{{ .Values.mariadb.user }}"
+            - name: DB_PASSWORD
+              value: "{{ .Values.mariadb.password }}"
