@@ -5,7 +5,7 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-  k8s-pods.json: |
+  k8s-pods.json: >
     {{- toJson (dict
       "annotations" (dict "list" (list (dict "builtIn" 1 "type" "dashboard")))
       "title" "Kubernetes Pod Metrics"
@@ -35,4 +35,4 @@ data:
         )
       )
       "time" (dict "from" "now-1h" "to" "now")
-    ) | indent 4 }}
+    ) }}
