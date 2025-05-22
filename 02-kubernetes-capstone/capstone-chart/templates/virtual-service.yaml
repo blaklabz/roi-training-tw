@@ -1,23 +1,12 @@
-apiVersion: networking.istio.io/v1beta1
-kind: VirtualService
-metadata:
-  name: {{ .Chart.Name }}-vs
-spec:
-  hosts:
-    - "*"
-  gateways:
-    - {{ .Chart.Name }}-gateway
-  http:
-    - route:
-        - destination:
-            host: {{ .Chart.Name }}-web
-            subset: v1
-            port:
-              number: 8080
-          weight: {{ .Values.istio.weight.v1 }}
-        - destination:
-            host: {{ .Chart.Name }}-web
-            subset: v2
-            port:
-              number: 8080
-          weight: {{ .Values.istio.weight.v2 }}
+http:
+  - route:
+      - destination:
+          host: capstone-chart-web-v1
+          port:
+            number: 8080
+        weight: 100
+      - destination:
+          host: capstone-chart-web-v2
+          port:
+            number: 8080
+        weight: 0
