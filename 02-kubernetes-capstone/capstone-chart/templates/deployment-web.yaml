@@ -6,7 +6,8 @@ spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Chart.Name }}-web-v1
+      app: {{ .Chart.Name }}-web
+      version: v1
   template:
     metadata:
       labels:
