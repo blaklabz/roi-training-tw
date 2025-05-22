@@ -38,7 +38,7 @@ istio:
     v2: 0
 
 grafana:
-  adminPassword: "admin" # Change this or pull from a secret
+  adminPassword: "admin"
   service:
     type: LoadBalancer
   persistence:
@@ -48,22 +48,38 @@ grafana:
   plugins:
     - grafana-piechart-panel
   dashboardProviders:
-    apiVersion: 1
-    providers:
-      - name: "default"
-        orgId: 1
-        folder: ""
-        type: file
-        disableDeletion: false
-        editable: true
-        options:
-          path: /var/lib/grafana/dashboards
+    dashboardproviders.yaml:
+      apiVersion: 1
+      providers:
+        - name: "default"
+          orgId: 1
+          folder: ""
+          type: file
+          disableDeletion: false
+          editable: true
+          options:
+            path: /var/lib/grafana/dashboards
   sidecar:
     dashboards:
       enabled: true
       label: grafana_dashboard
       folder: /var/lib/grafana/dashboards
       searchNamespace: ALL
-      configMaps:
-        default: grafana-dashboards
-        istio: grafana-istio-dashboard
+  datasources:
+    datasources.yaml:
+      apiVersion: 1
+      datasources:
+        - name: Prometheus
+          type: prometheus
+          access: proxy
+          url: http://prometheus-server.default.svc.cluster.local
+          isDefault: true
+
+prometheus:
+  server:
+    persistentVolume:
+      enabled: true
+      storageClass: gp2
+      size: 2Gi
+    service:
+      type: ClusterIP
