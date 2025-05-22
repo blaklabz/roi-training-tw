@@ -1,6 +1,6 @@
-# ROI Training Capstone
+# ROI Training
 
-Welcome to the **ROI Training Capstone Project**, a hands-on DevOps training environment built to simulate real-world infrastructure and deployment challenges.
+Welcome to the **ROI Training Project**, a hands-on DevOps training environment built to simulate real-world infrastructure and deployment challenges.
 
 This repository contains all components necessary to build and manage a modern cloud-native microservices stack using:
 
@@ -29,4 +29,4 @@ This repository contains all components necessary to build and manage a modern c
      * build_local.sh - (an attempt at creating a repo in kubernetes to push too)
      * cluster.yaml
      * README.md
-* README.md                # You’re here!!!
+* README.md               <----- # You’re here!!!
