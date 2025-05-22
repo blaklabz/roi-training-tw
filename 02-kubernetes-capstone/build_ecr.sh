@@ -15,13 +15,16 @@ V2_TAG="v2.0"
 echo "🔐 Logging in to Amazon ECR..."
 aws ecr get-login-password --region $REGION | docker login --username AWS --password-stdin $REGISTRY
 
-# Ensure repositories exist
 echo "📦 Ensuring ECR repositories exist..."
-aws ecr describe-repositories --repository-names $API_REPO $WEB_REPO --region $REGION > /dev/null 2>&1 || {
-  echo "Creating missing repositories..."
-  aws ecr create-repository --repository-name $API_REPO --region $REGION
-  aws ecr create-repository --repository-name $WEB_REPO --region $REGION
-}
+
+for repo in $API_REPO $WEB_REPO; do
+  if aws ecr describe-repositories --repository-names $repo --region $REGION > /dev/null 2>&1; then
+    echo "✅ ECR repository '$repo' exists."
+  else
+    echo "🚀 Creating ECR repository '$repo'..."
+    aws ecr create-repository --repository-name $repo --region $REGION
+  fi
+done
 
 # --- API Images ---
 echo "🔧 Building and pushing $API_REPO $V1_TAG..."
