@@ -53,6 +53,9 @@ grafana:
       label: grafana_dashboard
       folder: /var/lib/grafana/dashboards
       searchNamespace: ALL
+      configMaps:
+        default: grafana-dashboards
+        istio: grafana-istio-dashboard
   datasources:
     datasources.yaml:
       apiVersion: 1
