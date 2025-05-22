@@ -83,3 +83,9 @@ prometheus:
       size: 2Gi
     service:
       type: ClusterIP
+
+alertmanager:
+  persistentVolume:
+    enabled: true
+    storageClass: gp2
+    size: 2Gi
