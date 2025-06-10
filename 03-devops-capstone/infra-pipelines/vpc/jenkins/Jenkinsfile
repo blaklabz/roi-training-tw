@@ -44,6 +44,7 @@ stages {
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
           ]]) {
+            sh 'git branch --show-current'
             sh 'terraform apply -auto-approve tfplan'
           }
         }
