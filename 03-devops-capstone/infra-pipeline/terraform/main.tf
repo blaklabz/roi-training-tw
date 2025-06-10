@@ -32,7 +32,6 @@ module "eks" {
   version         = "20.10.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
-  subnets         = module.vpc.private_subnets
   vpc_id          = module.vpc.vpc_id
 
   enable_irsa = true
