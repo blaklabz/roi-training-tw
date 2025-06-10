@@ -2,13 +2,14 @@ pipeline {
   agent any
 
   environment {
+    TF_WORKING_DIR = 'infra-pipelines/vpc/terraform'
     AWS_REGION = 'us-east-1'
   }
 
   stages {
     stage('Terraform Init') {
       steps {
-        dir('03-devops-capstone/infra-pipeline/terraform') {
+        dir("${TF_WORKING_DIR}") {
           sh 'terraform init'
         }
       }
@@ -16,7 +17,7 @@ pipeline {
 
     stage('Terraform Plan') {
       steps {
-        dir('03-devops-capstone/infra-pipeline/terraform') {
+        dir("${TF_WORKING_DIR}") {
           sh 'terraform plan -out=tfplan'
         }
       }
@@ -24,8 +25,9 @@ pipeline {
 
     stage('Terraform Apply') {
       steps {
-        dir('03-devops-capstone/infra-pipeline/terraform') {
-          sh 'terraform apply -auto-approve tfplan'
+        dir("${TF_WORKING_DIR}") {
+          input message: "Apply Terraform plan?"
+          sh 'terraform apply tfplan'
         }
       }
     }
