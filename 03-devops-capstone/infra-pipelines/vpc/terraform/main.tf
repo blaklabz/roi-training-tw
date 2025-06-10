@@ -1,10 +1,7 @@
-# main.tf
-
 provider "aws" {
   region = var.aws_region
 }
 
-# VPC Module
 module "vpc" {
   source  = "terraform-aws-modules/vpc/aws"
   version = "5.1.1"
@@ -24,52 +21,4 @@ module "vpc" {
     Terraform   = "true"
     Environment = var.environment
   }
-}
-
-# EKS Cluster Module
-module "eks" {
-  source          = "terraform-aws-modules/eks/aws"
-  version         = "20.10.0"
-  cluster_name    = var.cluster_name
-  cluster_version = var.kubernetes_version
-  vpc_id          = module.vpc.vpc_id
-
-  enable_irsa = true
-
-  eks_managed_node_groups = {
-    spot_node_group = {
-      desired_capacity = 2
-      max_capacity     = 3
-      min_capacity     = 1
-
-      instance_types = ["t3.medium"]
-      capacity_type  = "SPOT"
-
-      labels = {
-        lifecycle = "spot"
-      }
-    }
-  }
-
-  tags = {
-    Environment = var.environment
-    Terraform   = "true"
-  }
-}
-
-# Outputs
-output "cluster_name" {
-  value = module.eks.cluster_name
-}
-
-output "cluster_endpoint" {
-  value = module.eks.cluster_endpoint
-}
-
-output "cluster_security_group_id" {
-  value = module.eks.cluster_security_group_id
-}
-
-output "node_group_role_arn" {
-  value = module.eks.eks_managed_node_groups["spot_node_group"].iam_role_arn
 }
