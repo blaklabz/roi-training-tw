@@ -1,6 +1,6 @@
 pipeline {
   agent any
-
+  echo "Current Git branch: ${env.BRANCH_NAME}"
   environment {
     TF_WORKING_DIR = '03-devops-capstone/infra-pipelines/vpc/terraform'
     AWS_REGION = 'us-east-1'
