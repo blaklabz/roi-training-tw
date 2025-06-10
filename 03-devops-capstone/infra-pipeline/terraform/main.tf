@@ -29,6 +29,7 @@ module "vpc" {
 # EKS Cluster Module
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
+  version         = "20.10.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
   subnets         = module.vpc.private_subnets
@@ -48,14 +49,6 @@ module "eks" {
       labels = {
         lifecycle = "spot"
       }
-
-      taints = [
-        {
-          key    = "spotInstance"
-          value  = "true"
-          effect = "NO_SCHEDULE"
-        }
-      ]
     }
   }
 
