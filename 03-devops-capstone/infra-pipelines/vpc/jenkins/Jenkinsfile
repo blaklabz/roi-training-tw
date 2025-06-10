@@ -28,6 +28,7 @@ stages {
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
           ]]) {
+            sh 'git branch --show-current'
             sh 'terraform plan -out=tfplan'
           }
         }
