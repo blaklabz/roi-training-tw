@@ -2,7 +2,7 @@ pipeline {
   agent any
 
   environment {
-    TF_WORKING_DIR = 'infra-pipelines/vpc/terraform'
+    TF_WORKING_DIR = '03-devops-capstone/infra-pipelines/vpc/terraform'
     AWS_REGION = 'us-east-1'
   }
 
