@@ -5,27 +5,45 @@ pipeline {
     AWS_REGION = 'us-east-1'
   }
 
-  stages {
+stages {
     stage('Terraform Init') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
-          sh 'terraform init'
+        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+          withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+          ]]) {
+            sh 'terraform init'
+          }
         }
       }
     }
 
     stage('Terraform Plan') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
-          sh 'terraform plan -out=tfplan'
+        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+          withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+          ]]) {
+            sh 'terraform plan -out=tfplan'
+          }
         }
       }
     }
 
     stage('Terraform Apply') {
+      when {
+        branch 'main'
+      }
       steps {
-        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
-          sh 'terraform apply -auto-approve tfplan'
+        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+          withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+          ]]) {
+            sh 'terraform apply -auto-approve tfplan'
+          }
         }
       }
     }

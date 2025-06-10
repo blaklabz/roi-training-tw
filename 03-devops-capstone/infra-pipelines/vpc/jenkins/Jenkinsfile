@@ -9,7 +9,7 @@ pipeline {
 stages {
     stage('Terraform Init') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir(env.TF_WORKING_DIR) {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -22,7 +22,7 @@ stages {
 
     stage('Terraform Plan') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir('env.TF_WORKING_DIR') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -38,7 +38,7 @@ stages {
         branch 'main'
       }
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir('env.TF_WORKING_DIR') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
