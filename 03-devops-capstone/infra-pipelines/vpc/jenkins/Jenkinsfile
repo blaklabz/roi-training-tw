@@ -22,7 +22,7 @@ stages {
 
     stage('Terraform Plan') {
       steps {
-        dir('env.TF_WORKING_DIR') {
+        dir(env.TF_WORKING_DIR) {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -38,7 +38,7 @@ stages {
         branch 'main'
       }
       steps {
-        dir('env.TF_WORKING_DIR') {
+        dir(env.TF_WORKING_DIR) {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
