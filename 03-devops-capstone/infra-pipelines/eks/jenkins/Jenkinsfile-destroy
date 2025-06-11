@@ -6,10 +6,10 @@ pipeline {
     AWS_REGION = 'us-east-1'
   }
 
-stages {
+  stages {
     stage('Terraform Init') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
+        dir("${TF_WORKING_DIR}") {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -20,30 +20,14 @@ stages {
       }
     }
 
-    stage('Terraform Plan') {
+    stage('Terraform Destroy') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir("${TF_WORKING_DIR}") {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
           ]]) {
-            sh 'terraform plan -out=tfplan'
-          }
-        }
-      }
-    }
-
-    stage('Terraform Apply') {
-      when {
-        branch 'main'
-      }
-      steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
-          withCredentials([[
-            $class: 'AmazonWebServicesCredentialsBinding',
-            credentialsId: 'aws-credentials'
-          ]]) {
-            sh 'terraform apply -auto-approve tfplan'
+            sh 'terraform destroy -auto-approve'
           }
         }
       }

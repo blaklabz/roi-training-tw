@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: { { include "ai-api.fullname" . } }
+spec:
+  replicas: { { .Values.replicaCount } }
+  selector:
+    matchLabels:
+      app: { { include "ai-api.name" . } }
+  template:
+    metadata:
+      labels:
+        app: { { include "ai-api.name" . } }
+    spec:
+      containers:
+        - name: ai-api
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: { { .Values.image.pullPolicy } }
+          ports:
+            - containerPort: 5050
+          env:
+            - name: MODEL
+              value: "{{ .Values.env.MODEL }}"
+            - name: OPENAI_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ai-api-secret
+                  key: OPENAI_KEY
