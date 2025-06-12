@@ -4,7 +4,7 @@ metadata:
   name: ai-api-destination
   namespace: default
 spec:
-  host: ai-api.default.svc.cluster.local
+  host: ai-api
   subsets:
     - name: v1
       labels:
