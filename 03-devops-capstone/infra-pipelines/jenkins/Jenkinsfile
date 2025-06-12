@@ -5,34 +5,6 @@ pipeline {
     AWS_REGION = 'us-east-1'
     TF_IN_AUTOMATION = 'true'
   }
-
-  stages {
-    stage('Init VPC') {
-      steps {
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials'
-        ]]) {
-          dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
-            sh 'terraform init -migrate-state'
-          }
-        }
-      }
-    }
-
-    stage('Apply VPC') {
-      steps {
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials'
-        ]]) {
-          dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
-            sh 'terraform apply -auto-approve'
-          }
-        }
-      }
-    }
-
     stage('Init EKS') {
       steps {
         withCredentials([[
