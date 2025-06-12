@@ -9,6 +9,10 @@ pipeline {
   stages {
     stage('Init VPC') {
       steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+        ]]) {
         dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
           sh 'terraform init'
         }
@@ -17,6 +21,10 @@ pipeline {
 
     stage('Apply VPC') {
       steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+        ]]) {
         dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
           sh 'terraform apply -auto-approve'
         }
@@ -25,6 +33,10 @@ pipeline {
 
     stage('Init EKS') {
       steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+        ]]) {
         dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks") {
           sh 'terraform init'
         }
@@ -33,6 +45,10 @@ pipeline {
 
     stage('Apply EKS') {
       steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'aws-credentials'
+        ]]) {
         dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks") {
           sh 'terraform apply -auto-approve'
         }
