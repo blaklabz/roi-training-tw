@@ -4,9 +4,9 @@ pipeline {
   environment {
     AWS_DEFAULT_REGION = 'us-east-2'
     CLUSTER_NAME = 'cluster2-tw'
-    KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
     ISTIO_VERSION = '1.22.0'
     ISTIOCTL = "${env.WORKSPACE}/istio-${ISTIO_VERSION}/bin/istioctl"
+    KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
   }
 
   stages {
@@ -29,6 +29,12 @@ pipeline {
               --region $AWS_DEFAULT_REGION \
               --name $CLUSTER_NAME \
               --kubeconfig $KUBECONFIG_PATH
+
+            # Embed a valid token in kubeconfig so istioctl works
+            TOKEN=$(aws eks get-token --region $AWS_DEFAULT_REGION --cluster-name $CLUSTER_NAME --output json | jq -r .status.token)
+            CONTEXT_NAME=$(kubectl --kubeconfig=$KUBECONFIG_PATH config current-context)
+            kubectl --kubeconfig=$KUBECONFIG_PATH config set-credentials eks-user --token="$TOKEN"
+            kubectl --kubeconfig=$KUBECONFIG_PATH config set-context "$CONTEXT_NAME" --user=eks-user
           """
         }
       }
