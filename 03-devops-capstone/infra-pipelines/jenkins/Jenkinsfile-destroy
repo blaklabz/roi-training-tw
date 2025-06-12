@@ -8,7 +8,7 @@ pipeline {
   stages {
     stage('Destroy EKS Cluster') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
+        dir('03-devops-capstone/infra-pipelines/terraform/eks') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -24,7 +24,7 @@ pipeline {
 
     stage('Destroy VPC') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir('03-devops-capstone/infra-pipelines/terraform/eks') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
