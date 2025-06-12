@@ -1,18 +1,11 @@
 pipeline {
-  agent any
-
-  parameters {
-    string(name: 'SOURCE_DIR', defaultValue: '03-devops-capstone/ai-api', description: 'Path to Python source code')
-  }
-
-  stages {
-    stage('Lint Python Code') {
-      steps {
-        sh """
-          pip install flake8
-          flake8 ${params.SOURCE_DIR}
-        """
-      }
+    agent any
+    stages {
+        stage('Lint Python Code') {
+            steps {
+                sh 'pip install --user flake8'
+                sh '~/.local/bin/flake8 03-devops-capstone/ai-api'
+            }
+        }
     }
-  }
 }
