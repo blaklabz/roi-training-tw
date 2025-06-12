@@ -26,13 +26,13 @@ module "vpc" {
   }
 }
 
-# EKS Cluster Module
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "20.10.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
   vpc_id          = module.vpc.vpc_id
+  subnet_ids      = var.subnet_ids
 
   enable_irsa = true
 
