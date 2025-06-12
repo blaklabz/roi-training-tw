@@ -1,12 +1,12 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: {{ include "ai-api.name" . }}-vs
+  name: {{ include "ai-api.name" . }}-vs-{{ .Values.image.tag }}
 spec:
   hosts:
     - "*"
   gateways:
-    - istio-system/istio-ingressgateway
+    - istio-system/{{ include "ai-api.name" . }}-gw-{{ .Values.image.tag }}
   http:
     - route:
         - destination:

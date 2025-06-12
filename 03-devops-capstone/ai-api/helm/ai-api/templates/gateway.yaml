@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: {{ include "ai-api.name" . }}-gw
+  name: {{ include "ai-api.name" . }}-gw-{{ .Values.image.tag }}
   namespace: istio-system
 spec:
   selector:
