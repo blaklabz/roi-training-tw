@@ -22,7 +22,7 @@ stages {
 
     stage('Terraform Plan') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
@@ -35,7 +35,7 @@ stages {
 
     stage('Terraform Apply') {
       steps {
-        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
+        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
