@@ -9,7 +9,7 @@ pipeline {
   stages {
     stage('Init VPC') {
       steps {
-        dir('${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc') {
+        dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
           sh 'terraform init'
         }
       }
@@ -17,7 +17,7 @@ pipeline {
 
     stage('Apply VPC') {
       steps {
-        dir('${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc') {
+        dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/vpc") {
           sh 'terraform apply -auto-approve'
         }
       }
@@ -25,7 +25,7 @@ pipeline {
 
     stage('Init EKS') {
       steps {
-        dir('${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks') {
+        dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks") {
           sh 'terraform init'
         }
       }
@@ -33,7 +33,7 @@ pipeline {
 
     stage('Apply EKS') {
       steps {
-        dir('${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks') {
+        dir("${WORKSPACE}/03-devops-capstone/infra-pipelines/terraform/eks") {
           sh 'terraform apply -auto-approve'
         }
       }
