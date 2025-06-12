@@ -1,0 +1,51 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = 'us-east-1'
+    TF_IN_AUTOMATION = 'true'
+  }
+
+  stages {
+    stage('Init VPC') {
+      steps {
+        dir('infra-pipelines/terraform/vpc') {
+          sh 'terraform init'
+        }
+      }
+    }
+
+    stage('Apply VPC') {
+      steps {
+        dir('infra-pipelines/terraform/vpc') {
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+
+    stage('Init EKS') {
+      steps {
+        dir('infra-pipelines/terraform/eks') {
+          sh 'terraform init'
+        }
+      }
+    }
+
+    stage('Apply EKS') {
+      steps {
+        dir('infra-pipelines/terraform/eks') {
+          sh 'terraform apply -auto-approve'
+        }
+      }
+    }
+  }
+
+  post {
+    failure {
+      echo 'Pipeline failed. Check logs above.'
+    }
+    success {
+      echo 'VPC and EKS successfully provisioned!'
+    }
+  }
+}

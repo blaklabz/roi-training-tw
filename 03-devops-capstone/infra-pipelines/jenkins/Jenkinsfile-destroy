@@ -2,32 +2,37 @@ pipeline {
   agent any
 
   environment {
-    TF_WORKING_DIR = '03-devops-capstone/infra-pipelines/eks/terraform'
     AWS_REGION = 'us-east-1'
   }
 
   stages {
-    stage('Terraform Init') {
+    stage('Destroy EKS Cluster') {
       steps {
-        dir("${TF_WORKING_DIR}") {
+        dir('03-devops-capstone/infra-pipelines/eks/terraform') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
           ]]) {
-            sh 'terraform init'
+            sh '''
+              terraform init
+              terraform destroy -auto-approve
+            '''
           }
         }
       }
     }
 
-    stage('Terraform Destroy') {
+    stage('Destroy VPC') {
       steps {
-        dir("${TF_WORKING_DIR}") {
+        dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
           withCredentials([[
             $class: 'AmazonWebServicesCredentialsBinding',
             credentialsId: 'aws-credentials'
           ]]) {
-            sh 'terraform destroy -auto-approve'
+            sh '''
+              terraform init
+              terraform destroy -auto-approve
+            '''
           }
         }
       }
