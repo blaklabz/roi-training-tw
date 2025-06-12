@@ -1,12 +1,17 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { .Values.nameOverride | default .Chart.Name } }
+  name:
+    {
+      {
+        .Values.deploymentName | default (printf "%s-%s" .Chart.Name .Values.image.tag),
+      },
+    }
   labels:
     app: { { .Values.nameOverride | default .Chart.Name } }
     version: { { .Values.image.tag } }
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: { { .Values.replicaCount | default 1 } }
   selector:
     matchLabels:
       app: { { .Values.nameOverride | default .Chart.Name } }
@@ -20,7 +25,7 @@ spec:
       containers:
         - name: { { .Values.nameOverride | default .Chart.Name } }
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy:
+            { { .Values.image.pullPolicy | default "IfNotPresent" } }
           ports:
             - containerPort: 80
-          resources: { { - toYaml .Values.resources | nindent 12 } }
