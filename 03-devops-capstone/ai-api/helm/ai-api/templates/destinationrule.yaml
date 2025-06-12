@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: DestinationRule
 metadata:
-  name: {{ include "ai-api.name" . }}-dr
+  name: {{ include "ai-api.name" . }}-dr-{{ .Values.image.tag }}
 spec:
   host: {{ include "ai-api.name" . }}
   subsets:
