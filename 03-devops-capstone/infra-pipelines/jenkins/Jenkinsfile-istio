@@ -1,0 +1,58 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_DEFAULT_REGION = 'us-east-2'
+    CLUSTER_NAME = 'cluster2-tw'
+    KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Configure AWS and Connect to EKS') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh """
+            aws eks update-kubeconfig --region $AWS_DEFAULT_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG_PATH
+          """
+        }
+      }
+    }
+
+    stage('Install istioctl') {
+      steps {
+        sh '''
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.22.0 sh -
+          mv istio-1.22.0/bin/istioctl /usr/local/bin/
+          chmod +x /usr/local/bin/istioctl
+        '''
+      }
+    }
+
+    stage('Install Istio Base & Default Profile') {
+      steps {
+        sh """
+          istioctl install --set profile=default -y --kubeconfig $KUBECONFIG_PATH
+        """
+      }
+    }
+
+    stage('Label Default Namespace for Istio Injection') {
+      steps {
+        sh """
+          kubectl label namespace default istio-injection=enabled --overwrite --kubeconfig $KUBECONFIG_PATH
+        """
+      }
+    }
+  }
+}
