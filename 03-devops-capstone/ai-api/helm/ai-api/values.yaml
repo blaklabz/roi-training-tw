@@ -8,6 +8,7 @@ image:
 service:
   type: ClusterIP
   port: 80
+  targetPort: 5050
 
 ingress:
   enabled: false
