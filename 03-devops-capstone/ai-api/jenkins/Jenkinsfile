@@ -2,52 +2,43 @@ pipeline {
   agent any
 
   environment {
-    AWS_REGION = 'us-east-1'
-    ECR_REPO = 'your-ecr-repo-name' // no .dkr stuff
-    IMAGE_TAG = "${env.BUILD_NUMBER}"
-    TF_WORKING_DIR = '03-devops-capstone/infra-pipelines/eks/terraform'
+    AWS_REGION = 'us-east-2'
+    ECR_REGISTRY = '906328874067.dkr.ecr.us-east-2.amazonaws.com'
+    ECR_REPO = 'ai-api'
+    IMAGE_TAG = 'latest'
   }
 
   stages {
-    stage('Build Docker Image') {
+    stage('Checkout') {
       steps {
-        script {
-          docker.build("${ECR_REPO}:${IMAGE_TAG}")
-        }
+        checkout scm
       }
     }
 
-    stage('Login to ECR') {
+    stage('Authenticate to AWS ECR') {
       steps {
         withCredentials([[
           $class: 'AmazonWebServicesCredentialsBinding',
           credentialsId: 'aws-credentials'
         ]]) {
-          sh '''
-            aws ecr get-login-password --region $AWS_REGION | \
-            docker login --username AWS --password-stdin \
-            <your_account_id>.dkr.ecr.$AWS_REGION.amazonaws.com
-          '''
+          sh """
+            aws ecr get-login-password --region $AWS_REGION | docker login \
+              --username AWS \
+              --password-stdin $ECR_REGISTRY
+          """
         }
       }
     }
 
-    stage('Push to ECR') {
+    stage('Build, Tag, and Push Docker Image') {
       steps {
-        script {
-          docker.image("${ECR_REPO}:${IMAGE_TAG}")
-                .push()
+        dir('03-devops-capstone/ai-api') {
+          sh """
+            docker build -t $ECR_REPO:$IMAGE_TAG .
+            docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+            docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          """
         }
-      }
-    }
-
-    stage('Deploy to EKS via Helm') {
-      steps {
-        sh '''
-          helm upgrade --install ai-api ./helm \
-            --set image.repository=<your_account_id>.dkr.ecr.$AWS_REGION.amazonaws.com/${ECR_REPO} \
-            --set image.tag=${IMAGE_TAG}
-        '''
       }
     }
   }
