@@ -9,7 +9,7 @@ pipeline {
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r 03-devops-capstone/ai-api/requirements.txt
-                    pytest 03-devops-capstone/ai-api
+                    ./venv/bin/pytest 03-devops-capstone/ai-api
                 '''
             }
         }
