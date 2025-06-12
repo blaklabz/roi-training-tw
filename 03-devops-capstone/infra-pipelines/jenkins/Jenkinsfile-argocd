@@ -1,47 +1,29 @@
 pipeline {
     agent any
-
     environment {
-        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')        // Jenkins credential ID
-        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Jenkins credential ID
-        AWS_DEFAULT_REGION = "us-east-2"
+        AWS_REGION = 'us-east-2'
+        CLUSTER_NAME = 'cluster2-tw'
     }
-
     stages {
-        stage('Configure Kubeconfig') {
+        stage('Configure AWS and Connect to EKS') {
             steps {
-                withEnv([
-                    "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
-                    "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
-                    "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"
-                ]) {
-                    sh """
-                        aws eks update-kubeconfig --region us-east-2 --name cluster2-tw
-                    """
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials'
+                ]]) {
+                    sh '''
+                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+                    '''
                 }
-            }
-        }
-
-        stage('Create ArgoCD Namespace') {
-            steps {
-                sh """
-                    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-                """
             }
         }
 
         stage('Install ArgoCD') {
             steps {
-                sh """
-                    curl -sSL -o argocd-install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-                    kubectl apply -n argocd -f argocd-install.yaml
-                """
-            }
-        }
-
-        stage('Verify ArgoCD Deployment') {
-            steps {
-                sh "kubectl get pods -n argocd"
+                sh '''
+                    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+                    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+                '''
             }
         }
     }
