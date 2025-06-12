@@ -37,7 +37,7 @@ stages {
 
     stage('Terraform Apply') {
       when {
-        branch 'main'
+        branch '*/main'
       }
       steps {
         dir(env.TF_WORKING_DIR) {
