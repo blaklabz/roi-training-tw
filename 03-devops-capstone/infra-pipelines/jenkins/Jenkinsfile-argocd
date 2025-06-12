@@ -81,7 +81,7 @@ spec:
   source:
     repoURL: https://github.com/blaklabz/roi-training-tw.git
     targetRevision: HEAD
-    path: 03-devops-capstone/apps/ai-api
+    path: 03-devops-capstone/apps/ai-api-v1
     helm:
       valueFiles:
         - values-v1.yaml
@@ -105,7 +105,7 @@ spec:
   source:
     repoURL: https://github.com/blaklabz/roi-training-tw.git
     targetRevision: HEAD
-    path: 03-devops-capstone/apps/ai-api
+    path: 03-devops-capstone/apps/ai-api-v2
     helm:
       valueFiles:
         - values-v2.yaml
