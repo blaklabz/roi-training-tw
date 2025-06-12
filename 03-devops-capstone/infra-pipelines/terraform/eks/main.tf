@@ -20,7 +20,7 @@ module "eks" {
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
   vpc_id          = data.terraform_remote_state.vpc.outputs.vpc_id
-  subnet_ids      = data.terraform_remote_state.vpc.outputs.private_subnet_ids
+  subnet_ids      = data.terraform_remote_state.vpc.outputs.private_subnets
 
   enable_irsa = true
 
