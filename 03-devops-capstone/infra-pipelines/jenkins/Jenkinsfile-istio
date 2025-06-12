@@ -4,9 +4,8 @@ pipeline {
   environment {
     AWS_DEFAULT_REGION = 'us-east-2'
     CLUSTER_NAME = 'cluster2-tw'
-    ISTIO_VERSION = '1.22.0'
-    ISTIOCTL = "${env.WORKSPACE}/istio-${ISTIO_VERSION}/bin/istioctl"
     KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
+    ISTIO_VERSION = '1.22.0'
   }
 
   stages {
@@ -20,49 +19,58 @@ pipeline {
       steps {
         withCredentials([[
           $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials',
-          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+          credentialsId: 'aws-credentials'
         ]]) {
-          sh """
+          sh '''
             aws eks update-kubeconfig \
               --region $AWS_DEFAULT_REGION \
               --name $CLUSTER_NAME \
               --kubeconfig $KUBECONFIG_PATH
-
-            # Embed a valid token in kubeconfig so istioctl works
-            TOKEN=$(aws eks get-token --region $AWS_DEFAULT_REGION --cluster-name $CLUSTER_NAME --output json | jq -r .status.token)
-            CONTEXT_NAME=$(kubectl --kubeconfig=$KUBECONFIG_PATH config current-context)
-            kubectl --kubeconfig=$KUBECONFIG_PATH config set-credentials eks-user --token="$TOKEN"
-            kubectl --kubeconfig=$KUBECONFIG_PATH config set-context "$CONTEXT_NAME" --user=eks-user
-          """
+          '''
         }
       }
     }
 
-    stage('Download istioctl') {
+    stage('Install istioctl') {
       steps {
-        sh """
-          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=$ISTIO_VERSION sh -
-        """
+        sh '''
+          curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.22.0 sh -
+          chmod +x istio-1.22.0/bin/istioctl
+        '''
+      }
+    }
+
+    stage('Configure istioctl credentials') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials'
+        ]]) {
+          sh '''
+            TOKEN=$(aws eks get-token --region $AWS_DEFAULT_REGION --cluster-name $CLUSTER_NAME --output json | jq -r .status.token)
+            CONTEXT_NAME=$(kubectl --kubeconfig=$KUBECONFIG_PATH config current-context)
+            kubectl --kubeconfig=$KUBECONFIG_PATH config set-credentials eks-user --token="$TOKEN"
+            kubectl --kubeconfig=$KUBECONFIG_PATH config set-context "$CONTEXT_NAME" --user=eks-user
+          '''
+        }
       }
     }
 
     stage('Install Istio Base & Default Profile') {
       steps {
-        sh """
-          export KUBECONFIG=$KUBECONFIG_PATH
-          $ISTIOCTL install --set profile=default -y
-        """
+        sh '''
+          ./istio-1.22.0/bin/istioctl install --set profile=default -y \
+            --kubeconfig $KUBECONFIG_PATH
+        '''
       }
     }
 
     stage('Label Default Namespace for Istio Injection') {
       steps {
-        sh """
-          export KUBECONFIG=$KUBECONFIG_PATH
-          kubectl label namespace default istio-injection=enabled --overwrite
-        """
+        sh '''
+          kubectl label namespace default istio-injection=enabled --overwrite \
+            --kubeconfig $KUBECONFIG_PATH
+        '''
       }
     }
   }
