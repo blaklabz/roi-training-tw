@@ -5,6 +5,8 @@ pipeline {
     AWS_DEFAULT_REGION = 'us-east-2'
     CLUSTER_NAME = 'cluster2-tw'
     KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
+    ISTIO_VERSION = '1.22.0'
+    ISTIO_PATH = "${env.WORKSPACE}/istio-${ISTIO_VERSION}/bin/istioctl"
   }
 
   stages {
@@ -29,12 +31,10 @@ pipeline {
       }
     }
 
-    stage('Install istioctl') {
+    stage('Download istioctl') {
       steps {
         sh '''
           curl -L https://istio.io/downloadIstio | ISTIO_VERSION=1.22.0 sh -
-          mv istio-1.22.0/bin/istioctl /usr/local/bin/
-          chmod +x /usr/local/bin/istioctl
         '''
       }
     }
@@ -42,7 +42,7 @@ pipeline {
     stage('Install Istio Base & Default Profile') {
       steps {
         sh """
-          istioctl install --set profile=default -y --kubeconfig $KUBECONFIG_PATH
+          ${ISTIO_PATH} install --set profile=default -y --kubeconfig $KUBECONFIG_PATH
         """
       }
     }
