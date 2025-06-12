@@ -14,7 +14,7 @@ pipeline {
         stage('Run Semgrep Scan') {
             steps {
                 script {
-                    def result = sh(script: 'semgrep scan --quiet 03-devops-capstone/ai-api || true', returnStdout: true).trim()
+                    def result = sh(script: 'semgrep scan --config auto --quiet 03-devops-capstone/ai-api || true', returnStdout: true).trim()
                     if (result) {
                         echo "⚠️ Semgrep found issues:\n${result}"
                     } else {
