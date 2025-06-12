@@ -2,27 +2,13 @@ pipeline {
     agent any
 
     stages {
-        stage('Checkout Code') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Setup Virtual Environment') {
+        stage('Run Pytest') {
             steps {
                 sh '''
                     python3 -m venv venv
                     . venv/bin/activate
                     pip install --upgrade pip
                     pip install -r 03-devops-capstone/ai-api/requirements.txt
-                '''
-            }
-        }
-
-        stage('Run Unit Tests') {
-            steps {
-                sh '''
-                    . venv/bin/activate
                     pytest 03-devops-capstone/ai-api
                 '''
             }
