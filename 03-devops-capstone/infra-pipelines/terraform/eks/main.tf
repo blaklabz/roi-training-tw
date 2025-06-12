@@ -4,35 +4,23 @@ provider "aws" {
   region = var.aws_region
 }
 
-# VPC Module
-module "vpc" {
-  source  = "terraform-aws-modules/vpc/aws"
-  version = "5.1.1"
-
-  name = var.vpc_name
-  cidr = var.vpc_cidr
-
-  azs             = var.availability_zones
-  public_subnets  = var.public_subnets
-  private_subnets = var.private_subnets
-
-  enable_nat_gateway   = true
-  single_nat_gateway   = true
-  enable_dns_hostnames = true
-
-  tags = {
-    Terraform   = "true"
-    Environment = var.environment
+data "terraform_remote_state" "vpc" {
+  backend = "s3"
+  config = {
+    bucket = "capstone-pipelines2-tw"
+    key    = "vpc/terraform.tfstate"
+    region = "us-east-1"
   }
 }
+
 
 module "eks" {
   source          = "terraform-aws-modules/eks/aws"
   version         = "20.10.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
-  vpc_id          = module.vpc.vpc_id
-  subnet_ids      = var.subnet_ids
+  vpc_id          = data.terraform_remote_state.vpc.outputs.vpc_id
+  subnet_ids      = data.terraform_remote_state.vpc.outputs.private_subnet_ids
 
   enable_irsa = true
 
