@@ -1,8 +1,9 @@
 import pytest
+from unittest.mock import patch
 import sys
 import os
-from unittest.mock import patch
 
+# Make sure the app module is importable
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 from app import app
@@ -17,9 +18,10 @@ def test_healthz(client):
     assert response.status_code == 200
     assert response.data.decode("utf-8") == "OK"
 
-@patch("openai.OpenAI.chat.completions.create")
-def test_ask_api(mock_openai, client):
-    mock_openai.return_value.choices = [
+@patch("app.get_openai_client")
+def test_ask_api(mock_get_client, client):
+    mock_create = mock_get_client.return_value.chat.completions.create
+    mock_create.return_value.choices = [
         type("obj", (object,), {"message": type("msg", (object,), {"content": "Mocked response"})})
     ]
 

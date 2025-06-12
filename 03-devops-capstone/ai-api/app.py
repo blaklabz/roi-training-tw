@@ -4,6 +4,9 @@ import os
 
 app = Flask(__name__)
 
+def get_openai_client():
+    return OpenAI(api_key=os.getenv("OPENAI_KEY"))
+
 @app.route("/", methods=["GET", "POST"])
 def index():
     response = None
@@ -11,8 +14,7 @@ def index():
         prompt = request.form.get("prompt")
         if prompt:
             try:
-                openai_client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
-                ai_response = openai_client.chat.completions.create(
+                ai_response = get_openai_client().chat.completions.create(
                     model="gpt-4",
                     messages=[{"role": "user", "content": prompt}]
                 )
@@ -28,8 +30,7 @@ def ask_api():
     if not prompt:
         return jsonify({"error": "Missing prompt"}), 400
     try:
-        openai_client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
-        ai_response = openai_client.chat.completions.create(
+        ai_response = get_openai_client().chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}]
         )
