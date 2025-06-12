@@ -1,81 +1,109 @@
 pipeline {
-  agent any
+    agent any
 
-  environment {
-    AWS_REGION = "us-east-2"
-    CLUSTER_NAME = "cluster2-tw"
-    KUBECONFIG_PATH = "${WORKSPACE}/kubeconfig"
-  }
-
-  stages {
-    stage('Checkout') {
-      steps {
-        checkout scm
-      }
+    environment {
+        AWS_REGION = 'us-east-2'
+        CLUSTER_NAME = 'cluster2-tw'
+        KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
     }
 
-    stage('Configure AWS and Connect to EKS') {
-      steps {
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials',
-          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-        ]]) {
-          sh '''
-            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-          '''
+    stages {
+        stage('Configure AWS and Connect to EKS') {
+            steps {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials'
+                ]]) {
+                    sh """
+                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME} --kubeconfig ${KUBECONFIG_PATH}
+                        aws eks get-token --region ${AWS_REGION} --cluster-name ${CLUSTER_NAME} > /dev/null
+                    """
+                }
+            }
         }
-      }
-    }
 
-    stage('Install ArgoCD') {
-      steps {
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials',
-          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-        ]]) {
-          sh '''
-            export KUBECONFIG=$KUBECONFIG_PATH
-            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
-
-            kubectl --kubeconfig=$KUBECONFIG create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-            kubectl --kubeconfig=$KUBECONFIG apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
-          '''
+        stage('Install ArgoCD') {
+            steps {
+                sh """
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=${KUBECONFIG_PATH} apply --validate=false -f -
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
+                """
+            }
         }
-      }
-    }
 
-    stage('Expose ArgoCD Server') {
-      steps {
-        withCredentials([[
-          $class: 'AmazonWebServicesCredentialsBinding',
-          credentialsId: 'aws-credentials',
-          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-        ]]) {
-          sh '''
-            export KUBECONFIG=$KUBECONFIG_PATH
-            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
-
-            echo "Patching argocd-server service to LoadBalancer..."
-            kubectl --kubeconfig=$KUBECONFIG patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
-
-            echo "Waiting for ArgoCD external IP..."
-            for i in {1..30}; do
-              IP=$(kubectl --kubeconfig=$KUBECONFIG -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
-              if [ ! -z "$IP" ]; then
-                echo "ArgoCD is available at: http://$IP"
-                break
-              fi
-              echo "Waiting for external IP..."
-              sleep 10
-            done
-          '''
+        stage('Expose ArgoCD via LoadBalancer') {
+            steps {
+                sh """
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+                """
+            }
         }
-      }
+
+        stage('Wait for ArgoCD Server') {
+            steps {
+                sh """
+                    echo "Waiting for ArgoCD server deployment to be ready..."
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} wait deployment/argocd-server -n argocd --for=condition=Available=True --timeout=180s
+                """
+            }
+        }
+
+        stage('Deploy ArgoCD Application') {
+            steps {
+                script {
+                    def appManifest = '''\
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: bluegreen-demo
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/blaklabz/roi-training-tw.git
+    targetRevision: HEAD
+    path: 03-devops-capstone/apps/your-app
+    helm:
+      valueFiles:
+        - values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: default
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+'''.stripIndent()
+
+                    writeFile file: 'bluegreen-app.yaml', text: appManifest
+
+                    sh """
+                        kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f bluegreen-app.yaml
+                    """
+                }
+            }
+        }
+
+        stage('Print ArgoCD UI Info') {
+            steps {
+                script {
+                    def password = sh(
+                        script: "kubectl --kubeconfig=${KUBECONFIG_PATH} -n argocd get secret argocd-initial-admin-secret -o jsonpath='{.data.password}' | base64 --decode",
+                        returnStdout: true
+                    ).trim()
+
+                    def url = sh(
+                        script: "kubectl --kubeconfig=${KUBECONFIG_PATH} -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "🎯 ArgoCD URL: https://${url}"
+                    echo "🔑 ArgoCD Username: admin"
+                    echo "🔐 ArgoCD Password: ${password}"
+                }
+            }
+        }
     }
-  }
 }
