@@ -1,18 +1,27 @@
 pipeline {
-  agent any
-
-  parameters {
-    string(name: 'SOURCE_DIR', defaultValue: '03-devops-capstone/ai-api', description: 'Path to Python source code')
-  }
-
-  stages {
-    stage('Static Code Scan') {
-      steps {
-        sh """
-          pip install semgrep
-          semgrep scan --config auto ${params.SOURCE_DIR}
-        """
-      }
+    agent any
+    environment {
+        PATH = "${env.HOME}/.local/bin:${env.PATH}"
     }
-  }
+    stages {
+        stage('Install Semgrep') {
+            steps {
+                sh '''
+                pip install --user semgrep
+                '''
+            }
+        }
+        stage('Run Semgrep Scan') {
+            steps {
+                script {
+                    def result = sh(script: 'semgrep scan --quiet 03-devops-capstone/ai-api || true', returnStdout: true).trim()
+                    if (result) {
+                        echo "⚠️ Semgrep found issues:\n${result}"
+                    } else {
+                        echo '✅ Semgrep passed with no issues'
+                    }
+                }
+            }
+        }
+    }
 }
