@@ -74,11 +74,5 @@ pipeline {
         }
       }
     }
-
-    stage('Trigger Helm Deploy') {
-      steps {
-        build job: 'helm-deploy-ai-api', wait: true
-      }
-    }
   }
 }
