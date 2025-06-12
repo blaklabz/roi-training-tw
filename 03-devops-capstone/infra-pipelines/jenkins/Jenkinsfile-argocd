@@ -4,11 +4,11 @@ pipeline {
     environment {
         AWS_REGION = 'us-east-2'
         CLUSTER_NAME = 'cluster2-tw'
-        KUBECONFIG_PATH = "${WORKSPACE}/kubeconfig"
+        KUBECONFIG_PATH = "${env.WORKSPACE}/kubeconfig"
     }
 
     stages {
-        stage('Checkout') {
+        stage('Checkout Repo') {
             steps {
                 checkout scm
             }
@@ -16,13 +16,18 @@ pipeline {
 
         stage('Configure AWS and Connect to EKS') {
             steps {
-                withCredentials([[$class: 'AmazonWebServicesCredentialsBinding', credentialsId: 'aws-creds']]) {
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials'
+                ]]) {
                     sh '''
-                        aws eks update-kubeconfig --region ${AWS_REGION} --name ${CLUSTER_NAME} --kubeconfig ${KUBECONFIG_PATH}
+                        export AWS_REGION=${AWS_REGION}
+                        export CLUSTER_NAME=${CLUSTER_NAME}
                         export KUBECONFIG=${KUBECONFIG_PATH}
-                        aws eks get-token --region ${AWS_REGION} --cluster-name ${CLUSTER_NAME} | jq -r '.status.token' > token.txt
-                        export TOKEN=$(cat token.txt)
-                        kubectl --kubeconfig=${KUBECONFIG_PATH} config set-credentials arn:aws:eks:${AWS_REGION}:906328874067:cluster/${CLUSTER_NAME} --token=$TOKEN
+
+                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
+                        TOKEN=$(aws eks get-token --region $AWS_REGION --cluster-name $CLUSTER_NAME --output json | jq -r .status.token)
+                        kubectl --kubeconfig=$KUBECONFIG config set-credentials arn:aws:eks:$AWS_REGION:906328874067:cluster/$CLUSTER_NAME --token=$TOKEN
                     '''
                 }
             }
@@ -31,9 +36,8 @@ pipeline {
         stage('Install ArgoCD') {
             steps {
                 sh '''
-                    export KUBECONFIG=${KUBECONFIG_PATH}
-                    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-                    kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=${KUBECONFIG_PATH} apply --validate=false -f -
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
                 '''
             }
         }
@@ -41,30 +45,32 @@ pipeline {
         stage('Expose ArgoCD via LoadBalancer') {
             steps {
                 sh '''
-                    export KUBECONFIG=${KUBECONFIG_PATH}
-                    kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+                    kubectl --kubeconfig=${KUBECONFIG_PATH} patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
                 '''
             }
         }
 
         stage('Wait for ArgoCD Server') {
             steps {
-                script {
-                    timeout(time: 2, unit: 'MINUTES') {
-                        waitUntil {
-                            def status = sh(script: "kubectl --kubeconfig=${KUBECONFIG_PATH} get svc -n argocd argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}'", returnStdout: true).trim()
-                            return status != ""
-                        }
-                    }
-                }
+                sh '''
+                    echo "Waiting for ArgoCD LoadBalancer to get external IP..."
+                    for i in {1..30}; do
+                        EXTERNAL_IP=$(kubectl --kubeconfig=${KUBECONFIG_PATH} get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                        if [[ ! -z "$EXTERNAL_IP" ]]; then
+                            echo "ArgoCD is available at: http://$EXTERNAL_IP"
+                            break
+                        fi
+                        echo "Still waiting..."
+                        sleep 10
+                    done
+                '''
             }
         }
 
         stage('Deploy ArgoCD Application') {
             steps {
                 sh '''
-                    export KUBECONFIG=${KUBECONFIG_PATH}
-                    cat <<EOF | kubectl apply -f -
+                    cat <<EOF | kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f -
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
@@ -96,11 +102,8 @@ EOF
         stage('Print ArgoCD UI Info') {
             steps {
                 sh '''
-                    export KUBECONFIG=${KUBECONFIG_PATH}
-                    echo "ArgoCD UI will be available at:"
-                    kubectl get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}' && echo
-                    echo "To get admin password run:"
-                    echo "kubectl get secret argocd-initial-admin-secret -n argocd -o jsonpath='{.data.password}' | base64 -d && echo"
+                    ARGO_URL=$(kubectl --kubeconfig=${KUBECONFIG_PATH} get svc argocd-server -n argocd -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+                    echo "Visit the ArgoCD UI at: http://$ARGO_URL"
                 '''
             }
         }
