@@ -8,8 +8,9 @@ pipeline {
         stage('Configure AWS and Connect to EKS') {
             steps {
                 withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials'
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
                 ]]) {
                     sh '''
                         aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
@@ -18,23 +19,25 @@ pipeline {
             }
         }
 
-    stage('Install ArgoCD') {
-    steps {
-        script {
-            def kubeconfigPath = "${env.WORKSPACE}/kubeconfig"
-            withCredentials([[
-                $class: 'AmazonWebServicesCredentialsBinding',
-                credentialsId: 'aws-credentials'
-            ]]) {
-                sh """
-                    export KUBECONFIG=${kubeconfigPath}
-                    aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.CLUSTER_NAME} --kubeconfig ${kubeconfigPath}
-                    # This command forces a token refresh and validates cluster access
-                    aws eks get-token --region ${env.AWS_REGION} --cluster-name ${env.CLUSTER_NAME} > /dev/null
+        stage('Install ArgoCD') {
+            steps {
+                script {
+                    def kubeconfigPath = "${env.WORKSPACE}/kubeconfig"
+                    withCredentials([[
+                        credentialsId: 'aws-credentials',
+                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                    ]]) {
+                        sh """
+                            export KUBECONFIG=${kubeconfigPath}
+                            aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.CLUSTER_NAME} --kubeconfig ${kubeconfigPath}
+                            aws eks get-token --region ${env.AWS_REGION} --cluster-name ${env.CLUSTER_NAME} > /dev/null
 
-                    kubectl --kubeconfig=${kubeconfigPath} create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=${kubeconfigPath} apply --validate=false -f -
-                    kubectl --kubeconfig=${kubeconfigPath} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
-                """
+                            kubectl --kubeconfig=${kubeconfigPath} create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=${kubeconfigPath} apply --validate=false -f -
+                            kubectl --kubeconfig=${kubeconfigPath} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
+                        """
+                    }
+                }
             }
         }
     }
