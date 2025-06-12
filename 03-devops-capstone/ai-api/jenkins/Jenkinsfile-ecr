@@ -53,10 +53,7 @@ pipeline {
             def versions = ['v1': 'bg1.jpg', 'v2': 'bg2.jpg']
             versions.each { tag, bgImage ->
               sh """
-                docker build \
-                  --build-arg BACKGROUND_IMAGE=${bgImage} \
-                  -t $ECR_REPO:${tag} .
-
+                docker build --build-arg BACKGROUND_IMAGE=${bgImage} -t $ECR_REPO:${tag} .
                 docker tag $ECR_REPO:${tag} $ECR_REGISTRY/$ECR_REPO:${tag}
                 docker push $ECR_REGISTRY/$ECR_REPO:${tag}
               """
@@ -68,10 +65,12 @@ pipeline {
 
     stage('Trigger Trivy Scans') {
       steps {
-        ['v1', 'v2'].each { tag ->
-          build job: 'trivy-scan-pipeline', wait: true, parameters: [
-            string(name: 'IMAGE', value: "$ECR_REGISTRY/$ECR_REPO:${tag}")
-          ]
+        script {
+          ['v1', 'v2'].each { tag ->
+            build job: 'trivy-scan-pipeline', wait: true, parameters: [
+              string(name: 'IMAGE', value: "$ECR_REGISTRY/$ECR_REPO:${tag}")
+            ]
+          }
         }
       }
     }
