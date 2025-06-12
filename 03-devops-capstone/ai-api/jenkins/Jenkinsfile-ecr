@@ -1,0 +1,54 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = 'us-east-2'
+    ECR_REGISTRY = '906328874067.dkr.ecr.us-east-2.amazonaws.com'
+    ECR_REPO = 'ai-api'
+    IMAGE_TAG = 'latest'
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
+    }
+
+    stage('Authenticate to AWS ECR') {
+      steps {
+        script {
+          sh """
+            aws ecr get-login-password --region $AWS_REGION | docker login \
+              --username AWS \
+              --password-stdin $ECR_REGISTRY
+          """
+        }
+      }
+    }
+
+    stage('Build Docker Image') {
+      steps {
+        sh """
+          docker build -t $ECR_REPO:$IMAGE_TAG .
+        """
+      }
+    }
+
+    stage('Tag Docker Image') {
+      steps {
+        sh """
+          docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+        """
+      }
+    }
+
+    stage('Push to ECR') {
+      steps {
+        sh """
+          docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+        """
+      }
+    }
+  }
+}
