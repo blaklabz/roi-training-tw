@@ -17,7 +17,7 @@ def test_healthz(client):
     assert response.status_code == 200
     assert response.data.decode("utf-8") == "OK"
 
-@patch("app.openai_client.chat.completions.create")
+@patch("openai.OpenAI.chat.completions.create")
 def test_ask_api(mock_openai, client):
     mock_openai.return_value.choices = [
         type("obj", (object,), {"message": type("msg", (object,), {"content": "Mocked response"})})
