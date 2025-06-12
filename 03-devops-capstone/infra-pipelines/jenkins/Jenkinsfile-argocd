@@ -1,52 +1,40 @@
 pipeline {
-  agent any
-
-  environment {
-    NAMESPACE = 'argocd'
-    ARGOCD_RELEASE = 'argocd'
-    CHART_REPO = 'https://argoproj.github.io/argo-helm'
-    CHART_NAME = 'argo-cd'
-  }
-
-  stages {
-    stage('Create Namespace') {
-      steps {
-        sh 'kubectl create namespace $NAMESPACE || true'
-      }
+    agent any
+    environment {
+        PATH = "${env.HOME}/.local/bin:${env.PATH}"
+        KUBECONFIG = "${env.HOME}/.kube/config"  // Adjust if you're using a different path
     }
-
-    stage('Add Helm Repo') {
-      steps {
-        sh '''
-          helm repo add argo $CHART_REPO
-          helm repo update
-        '''
-      }
-    }
-
-    stage('Install ArgoCD') {
-      steps {
-        sh '''
-          helm upgrade --install $ARGOCD_RELEASE argo/$CHART_NAME \
-            --namespace $NAMESPACE \
-            --set server.service.type=LoadBalancer
-        '''
-      }
-    }
-
-    stage('Wait for LoadBalancer') {
-      steps {
-        script {
-          sh '''
-            echo "Waiting for ArgoCD LoadBalancer IP..."
-            for i in {1..30}; do
-              EXTERNAL_IP=$(kubectl get svc argocd-server -n $NAMESPACE -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" 2>/dev/null || true)
-              [ -n "$EXTERNAL_IP" ] && echo "Found: $EXTERNAL_IP" && break
-              sleep 10
-            done
-          '''
+    stages {
+        stage('Install ArgoCD') {
+            steps {
+                script {
+                    sh """
+                        kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+                        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+                    """
+                }
+            }
         }
-      }
+
+        stage('Wait for ArgoCD pods') {
+            steps {
+                script {
+                    sh """
+                        echo "Waiting for ArgoCD server to be ready..."
+                        kubectl wait --namespace argocd \
+                          --for=condition=available deployment/argocd-server \
+                          --timeout=180s
+                    """
+                }
+            }
+        }
     }
-  }
+    post {
+        success {
+            echo '✅ ArgoCD has been deployed successfully!'
+        }
+        failure {
+            echo '❌ Failed to deploy ArgoCD.'
+        }
+    }
 }
