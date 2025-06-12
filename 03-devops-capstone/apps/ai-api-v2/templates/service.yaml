@@ -5,12 +5,12 @@ metadata:
   labels:
     app: "{{ .Values.nameOverride | default .Chart.Name }}"
 spec:
-  type: "{{ .Values.service.type }}"
+  type: "{{ .Values.service.type | default "ClusterIP" }}"
   selector:
     app: "{{ .Values.nameOverride | default .Chart.Name }}"
-    version: "{{ .Values.image.tag }}"
+    version: "{{ .Values.image.tag | default "v1" }}"
   ports:
-    - port: { { .Values.service.port } }
+    - port: {{ .Values.service.port | default 80 }}
       targetPort: 80
       protocol: TCP
       name: http
