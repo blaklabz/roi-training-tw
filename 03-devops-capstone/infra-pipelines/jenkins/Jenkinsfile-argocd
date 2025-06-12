@@ -1,13 +1,16 @@
 pipeline {
     agent any
+
     environment {
         AWS_REGION = 'us-east-2'
         CLUSTER_NAME = 'cluster2-tw'
     }
+
     stages {
         stage('Configure AWS and Connect to EKS') {
             steps {
                 withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
                     credentialsId: 'aws-credentials',
                     accessKeyVariable: 'AWS_ACCESS_KEY_ID',
                     secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
@@ -21,22 +24,22 @@ pipeline {
 
         stage('Install ArgoCD') {
             steps {
-                script {
-                    def kubeconfigPath = "${env.WORKSPACE}/kubeconfig"
-                    withCredentials([[
-                        credentialsId: 'aws-credentials',
-                        accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                        secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                    ]]) {
-                        sh """
-                            export KUBECONFIG=${kubeconfigPath}
-                            aws eks update-kubeconfig --region ${env.AWS_REGION} --name ${env.CLUSTER_NAME} --kubeconfig ${kubeconfigPath}
-                            aws eks get-token --region ${env.AWS_REGION} --cluster-name ${env.CLUSTER_NAME} > /dev/null
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'aws-credentials',
+                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+                ]]) {
+                    sh '''
+                        export KUBECONFIG=$WORKSPACE/kubeconfig
+                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
 
-                            kubectl --kubeconfig=${kubeconfigPath} create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=${kubeconfigPath} apply --validate=false -f -
-                            kubectl --kubeconfig=${kubeconfigPath} apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
-                        """
-                    }
+                        # Create the argocd namespace
+                        kubectl --kubeconfig=$KUBECONFIG create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=$KUBECONFIG apply --validate=false -f -
+
+                        # Install ArgoCD
+                        kubectl --kubeconfig=$KUBECONFIG apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
+                    '''
                 }
             }
         }
