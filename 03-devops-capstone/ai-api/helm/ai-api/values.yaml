@@ -1,19 +1,16 @@
 replicaCount: 1
 
 image:
-  repository: your-dockerhub-user/ai-api
-  tag: latest
+  repository: <your ECR repo> # We'll plug this in soon
+  tag: "latest"
   pullPolicy: IfNotPresent
 
-env:
-  MODEL: gpt-4
-  OPENAI_KEY: "" # will be injected via secret
+service:
+  type: ClusterIP
+  port: 5050
 
-ingress:
-  enabled: true
-  host: yourdomain.example.com # change to your real domain
-  path: /
-  pathType: Prefix
-  className: nginx
+env:
+  openai_api_key: "" # Use secrets in production
+  environment: "production"
 
 resources: {}
