@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(name: 'SOURCE_DIR', defaultValue: '03-devops-capstone/ai-api', description: 'Path to Python source code')
+  }
+
+  stages {
+    stage('Static Code Scan') {
+      steps {
+        sh """
+          pip install semgrep
+          semgrep scan --config auto ${params.SOURCE_DIR}
+        """
+      }
+    }
+  }
+}

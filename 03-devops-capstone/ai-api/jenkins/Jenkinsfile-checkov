@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(name: 'IAC_DIR', defaultValue: '03-devops-capstone/ai-api/helm', description: 'Path to Helm or IaC files')
+  }
+
+  stages {
+    stage('Scan Helm/IaC') {
+      steps {
+        sh """
+          pip install checkov
+          checkov -d ${params.IAC_DIR}
+        """
+      }
+    }
+  }
+}

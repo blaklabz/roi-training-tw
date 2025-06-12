@@ -6,12 +6,30 @@ pipeline {
     ECR_REGISTRY = '906328874067.dkr.ecr.us-east-2.amazonaws.com'
     ECR_REPO = 'ai-api'
     IMAGE_TAG = 'latest'
+    SOURCE_DIR = '03-devops-capstone/ai-api'
   }
 
   stages {
     stage('Checkout') {
+      steps { checkout scm }
+    }
+
+    stage('Pre-check: Code Quality + Security') {
       steps {
-        checkout scm
+        script {
+          def checks = [
+            [job: 'pytest-ai-api',       params: [string(name: 'SOURCE_DIR', value: SOURCE_DIR)]],
+            [job: 'flake8-ai-api',       params: [string(name: 'SOURCE_DIR', value: SOURCE_DIR)]],
+            [job: 'hadolint-ai-api',     params: [string(name: 'DOCKERFILE_PATH', value: "${SOURCE_DIR}/Dockerfile")]],
+            [job: 'yamllint-ai-api',     params: [string(name: 'YAML_DIR', value: "${SOURCE_DIR}/manifests")]],
+            [job: 'checkov-ai-api',      params: [string(name: 'IAC_DIR', value: "${SOURCE_DIR}/helm")]],
+            [job: 'semgrep-ai-api',      params: [string(name: 'SOURCE_DIR', value: SOURCE_DIR)]]
+          ]
+
+          for (check in checks) {
+            build job: check.job, parameters: check.params, wait: true
+          }
+        }
       }
     }
 
@@ -30,26 +48,14 @@ pipeline {
       }
     }
 
-    stage('Build Docker Image') {
+    stage('Build & Push Image') {
       steps {
-        dir('03-devops-capstone/ai-api') {
-          sh "docker build -t $ECR_REPO:$IMAGE_TAG ."
-        }
-      }
-    }
-
-    stage('Tag Docker Image') {
-      steps {
-        dir('03-devops-capstone/ai-api') {
-          sh "docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
-        }
-      }
-    }
-
-    stage('Push to ECR') {
-      steps {
-        dir('03-devops-capstone/ai-api') {
-          sh "docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG"
+        dir("${SOURCE_DIR}") {
+          sh """
+            docker build -t $ECR_REPO:$IMAGE_TAG .
+            docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+            docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+          """
         }
       }
     }
@@ -59,6 +65,12 @@ pipeline {
         build job: 'trivy-scan-pipeline', wait: true, parameters: [
           string(name: 'IMAGE', value: "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG")
         ]
+      }
+    }
+
+    stage('Trigger Helm Deploy') {
+      steps {
+        build job: 'helm-deploy-ai-api', wait: true
       }
     }
   }

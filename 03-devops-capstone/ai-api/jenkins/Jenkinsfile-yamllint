@@ -1,0 +1,18 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(name: 'YAML_DIR', defaultValue: '03-devops-capstone/ai-api/manifests', description: 'Path to YAML files')
+  }
+
+  stages {
+    stage('Lint YAML') {
+      steps {
+        sh """
+          pip install yamllint
+          yamllint ${params.YAML_DIR}
+        """
+      }
+    }
+  }
+}

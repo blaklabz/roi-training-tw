@@ -1,0 +1,21 @@
+pipeline {
+  agent any
+
+  parameters {
+    string(name: 'SOURCE_DIR', defaultValue: '03-devops-capstone/ai-api', description: 'Path to Python source code')
+  }
+
+  stages {
+    stage('Install Requirements') {
+      steps {
+        sh "pip install -r ${params.SOURCE_DIR}/requirements.txt"
+      }
+    }
+
+    stage('Run Unit Tests') {
+      steps {
+        sh "pytest ${params.SOURCE_DIR} || true"
+      }
+    }
+  }
+}

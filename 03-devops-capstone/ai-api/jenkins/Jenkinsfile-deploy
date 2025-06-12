@@ -1,0 +1,29 @@
+pipeline {
+  agent any
+
+  environment {
+    AWS_REGION = 'us-east-2'
+    CLUSTER_NAME = 'cluster2-tw'
+    NAMESPACE = 'ai-api'
+    CHART_PATH = '03-devops-capstone/ai-api/helm'
+  }
+
+  stages {
+    stage('Configure Kube Access') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials'
+        ]]) {
+          sh "aws eks --region $AWS_REGION update-kubeconfig --name $CLUSTER_NAME"
+        }
+      }
+    }
+
+    stage('Helm Deploy') {
+      steps {
+        sh "helm upgrade --install $NAMESPACE $CHART_PATH --namespace $NAMESPACE --create-namespace"
+      }
+    }
+  }
+}

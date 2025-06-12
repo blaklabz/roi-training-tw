@@ -1,0 +1,52 @@
+pipeline {
+  agent any
+
+  environment {
+    NAMESPACE = 'argocd'
+    ARGOCD_RELEASE = 'argocd'
+    CHART_REPO = 'https://argoproj.github.io/argo-helm'
+    CHART_NAME = 'argo-cd'
+  }
+
+  stages {
+    stage('Create Namespace') {
+      steps {
+        sh 'kubectl create namespace $NAMESPACE || true'
+      }
+    }
+
+    stage('Add Helm Repo') {
+      steps {
+        sh '''
+          helm repo add argo $CHART_REPO
+          helm repo update
+        '''
+      }
+    }
+
+    stage('Install ArgoCD') {
+      steps {
+        sh '''
+          helm upgrade --install $ARGOCD_RELEASE argo/$CHART_NAME \
+            --namespace $NAMESPACE \
+            --set server.service.type=LoadBalancer
+        '''
+      }
+    }
+
+    stage('Wait for LoadBalancer') {
+      steps {
+        script {
+          sh '''
+            echo "Waiting for ArgoCD LoadBalancer IP..."
+            for i in {1..30}; do
+              EXTERNAL_IP=$(kubectl get svc argocd-server -n $NAMESPACE -o jsonpath="{.status.loadBalancer.ingress[0].hostname}" 2>/dev/null || true)
+              [ -n "$EXTERNAL_IP" ] && echo "Found: $EXTERNAL_IP" && break
+              sleep 10
+            done
+          '''
+        }
+      }
+    }
+  }
+}
