@@ -1,47 +1,81 @@
 pipeline {
-    agent any
+  agent any
 
-    environment {
-        AWS_REGION = 'us-east-2'
-        CLUSTER_NAME = 'cluster2-tw'
+  environment {
+    AWS_REGION = "us-east-2"
+    CLUSTER_NAME = "cluster2-tw"
+    KUBECONFIG_PATH = "${WORKSPACE}/kubeconfig"
+  }
+
+  stages {
+    stage('Checkout') {
+      steps {
+        checkout scm
+      }
     }
 
-    stages {
-        stage('Configure AWS and Connect to EKS') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                    sh '''
-                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
-                    '''
-                }
-            }
+    stage('Configure AWS and Connect to EKS') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME
+          '''
         }
-
-        stage('Install ArgoCD') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'aws-credentials',
-                    accessKeyVariable: 'AWS_ACCESS_KEY_ID',
-                    secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
-                ]]) {
-                    sh '''
-                        export KUBECONFIG=$WORKSPACE/kubeconfig
-                        aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
-
-                        # Create the argocd namespace
-                        kubectl --kubeconfig=$KUBECONFIG create namespace argocd --dry-run=client -o yaml | kubectl --kubeconfig=$KUBECONFIG apply --validate=false -f -
-
-                        # Install ArgoCD
-                        kubectl --kubeconfig=$KUBECONFIG apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
-                    '''
-                }
-            }
-        }
+      }
     }
+
+    stage('Install ArgoCD') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            export KUBECONFIG=$KUBECONFIG_PATH
+            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
+
+            kubectl --kubeconfig=$KUBECONFIG create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+            kubectl --kubeconfig=$KUBECONFIG apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml --validate=false
+          '''
+        }
+      }
+    }
+
+    stage('Expose ArgoCD Server') {
+      steps {
+        withCredentials([[
+          $class: 'AmazonWebServicesCredentialsBinding',
+          credentialsId: 'aws-credentials',
+          accessKeyVariable: 'AWS_ACCESS_KEY_ID',
+          secretKeyVariable: 'AWS_SECRET_ACCESS_KEY'
+        ]]) {
+          sh '''
+            export KUBECONFIG=$KUBECONFIG_PATH
+            aws eks update-kubeconfig --region $AWS_REGION --name $CLUSTER_NAME --kubeconfig $KUBECONFIG
+
+            echo "Patching argocd-server service to LoadBalancer..."
+            kubectl --kubeconfig=$KUBECONFIG patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
+
+            echo "Waiting for ArgoCD external IP..."
+            for i in {1..30}; do
+              IP=$(kubectl --kubeconfig=$KUBECONFIG -n argocd get svc argocd-server -o jsonpath='{.status.loadBalancer.ingress[0].hostname}')
+              if [ ! -z "$IP" ]; then
+                echo "ArgoCD is available at: http://$IP"
+                break
+              fi
+              echo "Waiting for external IP..."
+              sleep 10
+            done
+          '''
+        }
+      }
+    }
+  }
 }
