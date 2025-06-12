@@ -8,6 +8,6 @@ image:
 replicaCount: 1
 
 service:
-  name: ai-api
+  name: ai-api-v1
   type: ClusterIP
   port: 80
