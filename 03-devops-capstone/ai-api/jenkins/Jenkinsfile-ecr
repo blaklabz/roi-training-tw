@@ -5,7 +5,6 @@ pipeline {
     AWS_REGION = 'us-east-2'
     ECR_REGISTRY = '906328874067.dkr.ecr.us-east-2.amazonaws.com'
     ECR_REPO = 'ai-api'
-    IMAGE_TAG = 'latest'
     SOURCE_DIR = '03-devops-capstone/ai-api'
   }
 
@@ -25,7 +24,6 @@ pipeline {
             [job: 'checkov-ai-api',      params: [string(name: 'IAC_DIR', value: "${SOURCE_DIR}/helm")]],
             [job: 'semgrep-ai-api',      params: [string(name: 'SOURCE_DIR', value: SOURCE_DIR)]]
           ]
-
           for (check in checks) {
             build job: check.job, parameters: check.params, wait: true
           }
@@ -48,23 +46,33 @@ pipeline {
       }
     }
 
-    stage('Build & Push Image') {
+    stage('Build & Push Images (v1 and v2)') {
       steps {
         dir("${SOURCE_DIR}") {
-          sh """
-            docker build -t $ECR_REPO:$IMAGE_TAG .
-            docker tag $ECR_REPO:$IMAGE_TAG $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-            docker push $ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
-          """
+          script {
+            def versions = ['v1': 'bg1.jpg', 'v2': 'bg2.jpg']
+            versions.each { tag, bgImage ->
+              sh """
+                docker build \
+                  --build-arg BACKGROUND_IMAGE=${bgImage} \
+                  -t $ECR_REPO:${tag} .
+
+                docker tag $ECR_REPO:${tag} $ECR_REGISTRY/$ECR_REPO:${tag}
+                docker push $ECR_REGISTRY/$ECR_REPO:${tag}
+              """
+            }
+          }
         }
       }
     }
 
-    stage('Trigger Trivy Scan') {
+    stage('Trigger Trivy Scans') {
       steps {
-        build job: 'trivy-scan-pipeline', wait: true, parameters: [
-          string(name: 'IMAGE', value: "$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG")
-        ]
+        ['v1', 'v2'].each { tag ->
+          build job: 'trivy-scan-pipeline', wait: true, parameters: [
+            string(name: 'IMAGE', value: "$ECR_REGISTRY/$ECR_REPO:${tag}")
+          ]
+        }
       }
     }
 
