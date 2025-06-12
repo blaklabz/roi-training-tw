@@ -34,9 +34,6 @@ stages {
     }
 
     stage('Terraform Apply') {
-      when {
-        branch 'main'
-      }
       steps {
         dir('03-devops-capstone/infra-pipelines/vpc/terraform') {
           withCredentials([[
