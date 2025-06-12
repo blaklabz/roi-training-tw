@@ -81,10 +81,10 @@ spec:
   source:
     repoURL: https://github.com/blaklabz/roi-training-tw.git
     targetRevision: HEAD
-    path: 03-devops-capstone/apps/ai-api-v1
+    path: 03-devops-capstone/ai-api/helm/ai-api
     helm:
       valueFiles:
-        - values.yaml
+        - values-v1.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -105,10 +105,10 @@ spec:
   source:
     repoURL: https://github.com/blaklabz/roi-training-tw.git
     targetRevision: HEAD
-    path: 03-devops-capstone/apps/ai-api-v2
+    path: 03-devops-capstone/ai-api/helm/ai-api
     helm:
       valueFiles:
-        - values.yaml
+        - values-v2.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default

@@ -1,0 +1,6 @@
+nameOverride: ai-api-v1
+image:
+  repository: 906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api
+  tag: v1
+  pullPolicy: Always
+replicaCount: 1
