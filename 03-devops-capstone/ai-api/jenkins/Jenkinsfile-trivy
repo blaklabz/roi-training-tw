@@ -3,21 +3,21 @@ pipeline {
 
   environment {
     IMAGE = '906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api:latest'
-    TRIVY_HOME = "${WORKSPACE}/trivy"
-    PATH = "${WORKSPACE}/trivy:${PATH}"
+    TRIVY_HOME = "${WORKSPACE}/trivy-bin"
+    PATH = "${WORKSPACE}/trivy-bin:${PATH}"
   }
 
   stages {
-    stage('Install Trivy') {
+    stage('Install Trivy Locally') {
       steps {
         sh """
           mkdir -p $TRIVY_HOME
-          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b $TRIVY_HOME
         """
       }
     }
 
-    stage('Scan Image') {
+    stage('Trivy Scan') {
       steps {
         sh """
           trivy image --exit-code 0 --severity MEDIUM,HIGH,CRITICAL $IMAGE
