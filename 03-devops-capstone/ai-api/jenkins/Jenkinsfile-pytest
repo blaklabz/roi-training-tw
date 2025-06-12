@@ -1,21 +1,31 @@
 pipeline {
-  agent any
+    agent any
 
-  parameters {
-    string(name: 'SOURCE_DIR', defaultValue: '03-devops-capstone/ai-api', description: 'Path to Python source code')
-  }
+    stages {
+        stage('Checkout Code') {
+            steps {
+                checkout scm
+            }
+        }
 
-  stages {
-    stage('Install Requirements') {
-      steps {
-        sh "pip install -r ${params.SOURCE_DIR}/requirements.txt"
-      }
+        stage('Setup Virtual Environment') {
+            steps {
+                sh '''
+                    python3 -m venv venv
+                    . venv/bin/activate
+                    pip install --upgrade pip
+                    pip install -r 03-devops-capstone/ai-api/requirements.txt
+                '''
+            }
+        }
+
+        stage('Run Unit Tests') {
+            steps {
+                sh '''
+                    . venv/bin/activate
+                    pytest 03-devops-capstone/ai-api
+                '''
+            }
+        }
     }
-
-    stage('Run Unit Tests') {
-      steps {
-        sh "pytest ${params.SOURCE_DIR} || true"
-      }
-    }
-  }
 }
