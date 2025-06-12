@@ -4,20 +4,22 @@ pipeline {
         PATH = "${env.HOME}/.local/bin:${env.PATH}"
     }
     stages {
-        stage('Scan IaC with Checkov') {
+        stage('Checkov Scan') {
             steps {
-                sh 'pip install --user checkov'
-
                 script {
-                    def checkovScan = sh(
-                        script: 'checkov -d 03-devops-capstone/infra --quiet --compact',
-                        returnStatus: true
-                    )
-
-                    if (checkovScan != 0) {
-                        echo '⚠️ Checkov found issues in your infrastructure code'
+                    def targetDir = '03-devops-capstone/infra-pipelines/terraform/eks'
+                    if (fileExists(targetDir)) {
+                        def checkovScan = sh(
+                            script: "checkov -d ${targetDir} --quiet --compact",
+                            returnStatus: true
+                        )
+                        if (checkovScan != 0) {
+                            echo "⚠️ Checkov completed with findings in ${targetDir}"
+                        } else {
+                            echo "✅ Checkov passed cleanly for ${targetDir}"
+                        }
                     } else {
-                        echo '✅ Checkov passed with no issues'
+                        echo "❌ Checkov skipped: directory '${targetDir}' not found"
                     }
                 }
             }
