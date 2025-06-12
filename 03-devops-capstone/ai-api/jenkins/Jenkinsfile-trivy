@@ -3,12 +3,15 @@ pipeline {
 
   environment {
     IMAGE = '906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api:latest'
+    TRIVY_HOME = "${WORKSPACE}/trivy"
+    PATH = "${WORKSPACE}/trivy:${PATH}"
   }
 
   stages {
     stage('Install Trivy') {
       steps {
         sh """
+          mkdir -p $TRIVY_HOME
           curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
         """
       }
