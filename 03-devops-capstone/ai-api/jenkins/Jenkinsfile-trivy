@@ -1,0 +1,25 @@
+pipeline {
+  agent any
+
+  environment {
+    IMAGE = '906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api:latest'
+  }
+
+  stages {
+    stage('Install Trivy') {
+      steps {
+        sh """
+          curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin
+        """
+      }
+    }
+
+    stage('Scan Image') {
+      steps {
+        sh """
+          trivy image --exit-code 0 --severity MEDIUM,HIGH,CRITICAL $IMAGE
+        """
+      }
+    }
+  }
+}

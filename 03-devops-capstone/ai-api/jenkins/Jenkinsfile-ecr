@@ -29,13 +29,6 @@ pipeline {
         }
       }
     }
-    stage('Debug Checkout') {
-      steps {
-        sh "ls -alh"
-        sh "ls -alh 03-devops-capstone"
-        sh "ls -alh 03-devops-capstone/ai-api"
-       }
-    }
 
     stage('Build Docker Image') {
       steps {
