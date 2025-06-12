@@ -84,7 +84,7 @@ spec:
     path: 03-devops-capstone/apps/ai-api-v1
     helm:
       valueFiles:
-        - values-v1.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
@@ -108,7 +108,7 @@ spec:
     path: 03-devops-capstone/apps/ai-api-v2
     helm:
       valueFiles:
-        - values-v2.yaml
+        - values.yaml
   destination:
     server: https://kubernetes.default.svc
     namespace: default
