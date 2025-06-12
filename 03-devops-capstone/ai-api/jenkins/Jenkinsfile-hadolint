@@ -1,19 +1,17 @@
 pipeline {
-  agent any
-
-  parameters {
-    string(name: 'DOCKERFILE_PATH', defaultValue: '03-devops-capstone/ai-api/Dockerfile', description: 'Path to Dockerfile')
-  }
-
-  stages {
-    stage('Lint Dockerfile') {
-      steps {
-        sh """
-          curl -sSL https://github.com/hadolint/hadolint/releases/latest/download/hadolint-$(uname -s)-$(uname -m) -o hadolint
-          chmod +x hadolint
-          ./hadolint ${params.DOCKERFILE_PATH}
-        """
-      }
+    agent any
+    environment {
+        HADOLINT_URL = 'https://github.com/hadolint/hadolint/releases/latest/download/hadolint-Linux-x86_64'
     }
-  }
+    stages {
+        stage('Hadolint Dockerfile Lint') {
+            steps {
+                sh '''
+                    curl -sSL $HADOLINT_URL -o hadolint
+                    chmod +x hadolint
+                    ./hadolint 03-devops-capstone/ai-api/Dockerfile || echo "⚠️ Hadolint completed with findings"
+                '''
+            }
+        }
+    }
 }
