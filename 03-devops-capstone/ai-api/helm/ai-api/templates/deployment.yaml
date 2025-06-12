@@ -1,28 +1,25 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { .Chart.Name } }
+  name: { { include "ai-api.fullname" . } }
   labels:
-    app: { { .Chart.Name } }
+    app: { { include "ai-api.name" . } }
+    version: { { .Values.image.tag } }
 spec:
   replicas: { { .Values.replicaCount } }
   selector:
     matchLabels:
-      app: { { .Chart.Name } }
+      app: { { include "ai-api.name" . } }
+      version: { { .Values.image.tag } }
   template:
     metadata:
       labels:
-        app: { { .Chart.Name } }
+        app: { { include "ai-api.name" . } }
+        version: { { .Values.image.tag } }
     spec:
       containers:
         - name: { { .Chart.Name } }
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: { { .Values.image.pullPolicy } }
           ports:
-            - containerPort: 5050
-          env:
-            - name: OPENAI_API_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: ai-api-secrets
-                  key: openai_api_key
+            - containerPort: 80

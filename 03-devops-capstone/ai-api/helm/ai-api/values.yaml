@@ -1,16 +1,21 @@
 replicaCount: 1
 
 image:
-  repository: <your ECR repo> # We'll plug this in soon
-  tag: "latest"
-  pullPolicy: IfNotPresent
+  repository: 906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api
+  tag: v1
+  pullPolicy: Always
 
 service:
   type: ClusterIP
-  port: 5050
+  port: 80
 
-env:
-  openai_api_key: "" # Use secrets in production
-  environment: "production"
+ingress:
+  enabled: false
 
 resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

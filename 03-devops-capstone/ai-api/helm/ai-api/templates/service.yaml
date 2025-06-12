@@ -1,12 +1,11 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: { { .Chart.Name } }
+  name: { { include "ai-api.name" . } }
 spec:
-  type: { { .Values.service.type } }
   selector:
-    app: { { .Chart.Name } }
+    app: { { include "ai-api.name" . } }
   ports:
     - protocol: TCP
       port: { { .Values.service.port } }
-      targetPort: 5050
+      targetPort: 80
