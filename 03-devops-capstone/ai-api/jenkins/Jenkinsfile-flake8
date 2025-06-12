@@ -6,7 +6,7 @@ pipeline {
     stages {
         stage('Lint Python Code') {
             steps {
-                export PATH=$HOME/.local/bin:$PATH
+                sh 'export PATH=$HOME/.local/bin:$PATH'
                 sh 'pip install --user flake8'
                 sh 'flake8 03-devops-capstone/ai-api'
             }
