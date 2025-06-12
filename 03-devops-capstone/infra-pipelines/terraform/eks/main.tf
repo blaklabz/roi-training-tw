@@ -19,8 +19,8 @@ module "eks" {
   version         = "20.10.0"
   cluster_name    = var.cluster_name
   cluster_version = var.kubernetes_version
-  vpc_id          = data.terraform_remote_state.vpc.outputs.vpc_id
-  subnet_ids      = data.terraform_remote_state.vpc.outputs.private_subnets
+  vpc_id          = data.aws_vpc.default.id
+  subnet_ids      = data.aws_subnets.default.ids
 
   enable_irsa = true
 
