@@ -1,8 +1,12 @@
 nameOverride: ai-api-v2
+
 image:
   repository: 906328874067.dkr.ecr.us-east-2.amazonaws.com/ai-api
   tag: v2
   pullPolicy: Always
+
+replicaCount: 1
+
 service:
   name: ai-api
   type: ClusterIP
