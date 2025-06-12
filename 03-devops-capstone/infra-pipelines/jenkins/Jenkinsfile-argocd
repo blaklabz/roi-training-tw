@@ -1,40 +1,48 @@
 pipeline {
     agent any
+
     environment {
-        PATH = "${env.HOME}/.local/bin:${env.PATH}"
-        KUBECONFIG = "${env.HOME}/.kube/config"  // Adjust if you're using a different path
+        AWS_ACCESS_KEY_ID = credentials('aws-access-key-id')        // Jenkins credential ID
+        AWS_SECRET_ACCESS_KEY = credentials('aws-secret-access-key') // Jenkins credential ID
+        AWS_DEFAULT_REGION = "us-east-2"
     }
+
     stages {
-        stage('Install ArgoCD') {
+        stage('Configure Kubeconfig') {
             steps {
-                script {
+                withEnv([
+                    "AWS_ACCESS_KEY_ID=${env.AWS_ACCESS_KEY_ID}",
+                    "AWS_SECRET_ACCESS_KEY=${env.AWS_SECRET_ACCESS_KEY}",
+                    "AWS_DEFAULT_REGION=${env.AWS_DEFAULT_REGION}"
+                ]) {
                     sh """
-                        kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
-                        kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+                        aws eks update-kubeconfig --region us-east-2 --name cluster2-tw
                     """
                 }
             }
         }
 
-        stage('Wait for ArgoCD pods') {
+        stage('Create ArgoCD Namespace') {
             steps {
-                script {
-                    sh """
-                        echo "Waiting for ArgoCD server to be ready..."
-                        kubectl wait --namespace argocd \
-                          --for=condition=available deployment/argocd-server \
-                          --timeout=180s
-                    """
-                }
+                sh """
+                    kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
+                """
             }
         }
-    }
-    post {
-        success {
-            echo '✅ ArgoCD has been deployed successfully!'
+
+        stage('Install ArgoCD') {
+            steps {
+                sh """
+                    curl -sSL -o argocd-install.yaml https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
+                    kubectl apply -n argocd -f argocd-install.yaml
+                """
+            }
         }
-        failure {
-            echo '❌ Failed to deploy ArgoCD.'
+
+        stage('Verify ArgoCD Deployment') {
+            steps {
+                sh "kubectl get pods -n argocd"
+            }
         }
     }
 }
