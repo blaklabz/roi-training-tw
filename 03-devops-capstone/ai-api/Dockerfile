@@ -6,14 +6,12 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copy app code
+# Copy app source
 COPY app.py .
 COPY templates/ templates/
-COPY static/ static/
+RUN mkdir -p static
+COPY images/${BACKGROUND_IMAGE} static/background.jpg
 
-# Accept background image at build time (optional)
-ARG BACKGROUND_IMAGE
-COPY images/${BACKGROUND_IMAGE} /app/static/bg.jpg
-
+# Expose and run
 EXPOSE 80
 CMD ["python", "app.py"]
