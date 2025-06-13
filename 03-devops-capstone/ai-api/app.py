@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify, render_template
-import openai
+from openai import OpenAI
 import os
 
 app = Flask(__name__, static_folder="static")
 
-# Set the OpenAI API key globally
-openai.api_key = os.getenv("OPENAI_API_KEY")
+# Create the OpenAI client using new SDK
+client = OpenAI(api_key=os.getenv("OPENAI_KEY"))
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -14,11 +14,11 @@ def index():
         prompt = request.form.get("prompt")
         if prompt:
             try:
-                ai_response = openai.ChatCompletion.create(
+                completion = client.chat.completions.create(
                     model="gpt-4",
                     messages=[{"role": "user", "content": prompt}]
                 )
-                response = ai_response.choices[0].message["content"].strip()
+                response = completion.choices[0].message.content.strip()
             except Exception as e:
                 response = f"Error: {e}"
     return render_template("index.html", response=response)
@@ -30,11 +30,11 @@ def ask_api():
     if not prompt:
         return jsonify({"error": "Missing prompt"}), 400
     try:
-        ai_response = openai.ChatCompletion.create(
+        completion = client.chat.completions.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}]
         )
-        answer = ai_response.choices[0].message["content"].strip()
+        answer = completion.choices[0].message.content.strip()
         return jsonify({"response": answer})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
