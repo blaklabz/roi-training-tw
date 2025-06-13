@@ -1,34 +1,37 @@
-# import pytest
-# from flask.testing import FlaskClient
-# from app import app
+import pytest
+from unittest.mock import patch, MagicMock
+from app import app
 
-# @pytest.fixture
-# def client():
-#     app.config["TESTING"] = True
-#     with app.test_client() as client:
-#         yield client
+@pytest.fixture
+def client():
+    app.config["TESTING"] = True
+    with app.test_client() as client:
+        yield client
 
-# def test_index_page(client: FlaskClient):
-#     response = client.get("/")
-#     assert response.status_code == 200
-#     assert b"<form" in response.data
+def test_index_get(client):
+    res = client.get("/")
+    assert res.status_code == 200
 
-# def test_ask_api(client: FlaskClient, monkeypatch):
-#     class MockResponse:
-#         def __init__(self):
-#             self.choices = [type("obj", (object,), {"message": type("msg", (object,), {"content": "Mocked response"})()})]
+def test_index_post(client):
+    with patch("app.OpenAI") as mock_openai:
+        mock_instance = MagicMock()
+        mock_instance.chat.completions.create.return_value.choices = [
+            MagicMock(message=MagicMock(content="Hello from AI"))
+        ]
+        mock_openai.return_value = mock_instance
 
-#     def mock_create(*args, **kwargs):
-#         return MockResponse()
+        res = client.post("/", data={"prompt": "Hello"})
+        assert res.status_code == 200
+        assert b"Hello from AI" in res.data
 
-#     def mock_openai_client():
-#         class MockClient:
-#             def __init__(self):
-#                 self.chat = type("obj", (), {"completions": type("obj", (), {"create": mock_create})})()
-#         return MockClient()
+def test_ask_api(client):
+    with patch("app.OpenAI") as mock_openai:
+        mock_instance = MagicMock()
+        mock_instance.chat.completions.create.return_value.choices = [
+            MagicMock(message=MagicMock(content="Hello via API"))
+        ]
+        mock_openai.return_value = mock_instance
 
-#     monkeypatch.setattr("app.get_openai_client", mock_openai_client)
-
-#     response = client.post("/ask", json={"prompt": "Hello"})
-#     assert response.status_code == 200
-#     assert response.get_json()["response"] == "Mocked response"
+        res = client.post("/ask", json={"prompt": "Hi"})
+        assert res.status_code == 200
+        assert res.get_json()["response"] == "Hello via API"
