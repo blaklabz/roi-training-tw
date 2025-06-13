@@ -1,26 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { .Values.nameOverride | default .Chart.Name } }
+  name: {{ .Values.nameOverride | default .Chart.Name }}
   labels:
     app: ai-api
-    version: { { .Values.image.tag } }
+    version: {{ .Values.image.tag }}
 spec:
-  replicas: { { .Values.replicaCount | default 1 } }
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
       app: ai-api
-      version: { { .Values.image.tag } }
+      version: {{ .Values.image.tag }}
   template:
     metadata:
       labels:
         app: ai-api
-        version: { { .Values.image.tag } }
+        version: {{ .Values.image.tag }}
     spec:
       containers:
-        - name: { { .Values.nameOverride | default .Chart.Name } }
+        - name: {{ .Values.nameOverride | default .Chart.Name }}
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
             - containerPort: 80
           env:
