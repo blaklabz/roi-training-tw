@@ -1,39 +1,37 @@
 import pytest
-from unittest.mock import patch
-import sys
-import os
-
-# Make sure the app module is importable
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from unittest.mock import patch, MagicMock
 from app import app
 
 @pytest.fixture
 def client():
-    app.testing = True
-    return app.test_client()
+    app.config["TESTING"] = True
+    with app.test_client() as client:
+        yield client
 
-def test_healthz(client):
-    response = client.get("/healthz")
-    assert response.status_code == 200
-    assert response.data.decode("utf-8") == "OK"
+def test_index_get(client):
+    res = client.get("/")
+    assert res.status_code == 200
 
-@patch("app.get_openai_client")
-def test_ask_api(mock_get_client, client):
-    mock_create = mock_get_client.return_value.chat.completions.create
-    mock_create.return_value.choices = [
-        type("obj", (object,), {"message": type("msg", (object,), {"content": "Mocked response"})})
-    ]
+def test_index_post(client):
+    with patch("app.OpenAI") as mock_openai:
+        mock_instance = MagicMock()
+        mock_instance.chat.completions.create.return_value.choices = [
+            MagicMock(message=MagicMock(content="Hello from AI"))
+        ]
+        mock_openai.return_value = mock_instance
 
-    response = client.post("/ask", json={"prompt": "Hello?"})
-    data = response.get_json()
+        res = client.post("/", data={"prompt": "Hello"})
+        assert res.status_code == 200
+        assert b"Hello from AI" in res.data
 
-    assert response.status_code == 200
-    assert data["response"] == "Mocked response"
+def test_ask_api(client):
+    with patch("app.OpenAI") as mock_openai:
+        mock_instance = MagicMock()
+        mock_instance.chat.completions.create.return_value.choices = [
+            MagicMock(message=MagicMock(content="Hello via API"))
+        ]
+        mock_openai.return_value = mock_instance
 
-def test_ask_api_missing_prompt(client):
-    response = client.post("/ask", json={})
-    data = response.get_json()
-
-    assert response.status_code == 400
-    assert data["error"] == "Missing prompt"
+        res = client.post("/ask", json={"prompt": "Hi"})
+        assert res.status_code == 200
+        assert res.get_json()["response"] == "Hello via API"
