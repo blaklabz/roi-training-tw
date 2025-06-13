@@ -1,11 +1,11 @@
 from flask import Flask, request, jsonify, render_template
-from openai import OpenAI
+import openai
 import os
 
 app = Flask(__name__, static_folder="static")
 
-def get_openai_client():
-    return OpenAI(api_key=os.getenv("OPENAI_KEY"))
+# Set the OpenAI API key globally
+openai.api_key = os.getenv("OPENAI_API_KEY")
 
 @app.route("/", methods=["GET", "POST"])
 def index():
@@ -14,11 +14,11 @@ def index():
         prompt = request.form.get("prompt")
         if prompt:
             try:
-                ai_response = get_openai_client().chat.completions.create(
+                ai_response = openai.ChatCompletion.create(
                     model="gpt-4",
                     messages=[{"role": "user", "content": prompt}]
                 )
-                response = ai_response.choices[0].message.content.strip()
+                response = ai_response.choices[0].message["content"].strip()
             except Exception as e:
                 response = f"Error: {e}"
     return render_template("index.html", response=response)
@@ -30,11 +30,11 @@ def ask_api():
     if not prompt:
         return jsonify({"error": "Missing prompt"}), 400
     try:
-        ai_response = get_openai_client().chat.completions.create(
+        ai_response = openai.ChatCompletion.create(
             model="gpt-4",
             messages=[{"role": "user", "content": prompt}]
         )
-        answer = ai_response.choices[0].message.content.strip()
+        answer = ai_response.choices[0].message["content"].strip()
         return jsonify({"response": answer})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
