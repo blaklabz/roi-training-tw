@@ -24,8 +24,8 @@ spec:
           ports:
             - containerPort: 80
           env:
-            - name: OPENAI_API_KEY
+            - name: OPENAI_KEY
               valueFrom:
                 secretKeyRef:
                   name: openai-secret
-                  key: OPENAI_API_KEY
+                  key: OPENAI_KEY
