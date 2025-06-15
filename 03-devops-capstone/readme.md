@@ -20,13 +20,21 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │       ├── values-v1.yaml      # Helm values for version 1
 │   │       ├── values-v2.yaml      # Helm values for version 2
 │   │       ├── secrets/            # Kubernetes secrets templates
+│   │        ├── .dockerconfigjson  # file for storing secret
 │   │       └── templates/          # Helm templates (deployment, service, gateway, etc.)
+│   │        ├── _helpers.tpl       # resuable naming/labels
+│   │        ├── deployment.yaml    # defines the ai-api pods
+│   │        ├── destinationrule.yaml # controls the loadbalancing
+│   │        ├── gateway.yaml       # expose the istio service
+│   │        ├── service.yaml       # creates the istio service
+│   │        ├── virtualservice.yaml  # routing rules of the service v1/v2
+│
 │   ├── images/                     # (Optional) Container images or related assets
 │   │
 │   ├── jenkins/                    # Modular Jenkins pipelines for code quality and security
-│   │
+│   │   │
 │   │   ├── Jenkinsfile-checkov    # Runs scans on Terraform code for misconfigurations and security
-│   │   ├── Jenkinsfile-deploy
+│   │   ├── Jenkinsfile-deploy     # Pipeline that will deploy the helm chart. (non-istio)
 │   │   ├── Jenkinsfile-ecr        # Main job that builds and pushes the image for the app and initiates pipelines.
 │   │   ├── Jenkinsfile-flake8     # Performs Python linting and style checks and tests.
 │   │   ├── Jenkinsfile-hadolint   # Lints Dockerfile looking for best-practice violations and general issues.
@@ -35,11 +43,12 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │   ├── Jenkinsfile-trivy      # Peforms an image scan to detect vulnerabilities in the container image.
 │   │   └── Jenkinsfile-yamllint   # Lints yaml files such as the Kubernetes manifests and Helm values.
 │   │
-│   ├── manifests/                  # Raw Kubernetes manifests (non-Helm)
 │   ├── requirements.txt            # Python dependencies
 │   ├── templates/                  # HTML templates for the app
 │   └── tests/                      # App-level test code
-├── apps/                           # (Optional) Placeholder or future apps directory
+│   │    ├── .flake8               # tests for flake8
+│   │    ├── test_app.py           # tests for pytest
+│
 ├── infra-pipelines/                # Infrastructure CI/CD and deployment logic
 │   ├── istio/                      # Istio configuration (DestinationRule, VirtualService)
 │   ├── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
