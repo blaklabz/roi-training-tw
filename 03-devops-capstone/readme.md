@@ -97,9 +97,26 @@ Note: I was able to get this to work on my local python env but couldn't get it 
 ## 🚀 Deployment Overview
 
 ## Prerequisites
+   * Have a Jenkins server up.
+      - server needs AWS access
+      - server has github access to https://github.com/blaklabz/roi-training-tw.git
    * Have a eks cluster deployed and available.
+   * Have a ecr avaialabe to use
    * Have an OpenAI key (required for bot)
 
 ### 1. Build and Push Image
+ - use jenkins to build the docker image and push it to the ecr.
+ ![Alt text](images/build-pipeline.png)
+
 ### 2. Set Secrets
+ - kubectl create secret generic openai-api-key \
+   --from-literal=OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx \
+   --namespace=default
+
 ### 3. Deploy Istio and ArgoCD
+ - use the jenkins jobs to deploy Istio to the cluster
+ - use the jenkins job to deploy ArgoCD to the cluster
+
+### 4. Manage deployments with ArgoCD
+ - access the argoCD UI from inside the cluster.
+    - the
