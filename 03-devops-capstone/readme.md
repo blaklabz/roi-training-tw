@@ -2,6 +2,8 @@
 
 This project is a lightweight Flask-based web application that lets users interact with OpenAI's GPT-4 via a web form or a REST API. It is containerized with Docker and deployed using Kubernetes and Istio, supporting blue/green deployments through versioned subsets.
 
+Note: I was able to get this to work on my local python env but couldn't get it to work in eks - however, the jenkins pipelines should be working on the instance devops-tw.
+
 ---
 
 <pre>
@@ -80,7 +82,7 @@ This project is a lightweight Flask-based web application that lets users intera
 - **ArgoCD** - https://github.com/argoproj/argo-cd https://argoproj.github.io/cd/
 - **Istio Ingress Gateway**
 
-## 📦 Pipeline Stack
+## 🔁 Pipeline Stack
 
 - **Checkov** - Static analysis for Terraform/IaC https://www.checkov.io/
 - **Flake8** – Python linter & style enforcer https://flake8.pycqa.org/
@@ -94,4 +96,10 @@ This project is a lightweight Flask-based web application that lets users intera
 
 ## 🚀 Deployment Overview
 
+## Prerequisites
+   * Have a eks cluster deployed and available.
+   * Have an OpenAI key (required for bot)
+
 ### 1. Build and Push Image
+### 2. Set Secrets
+### 3. Deploy Istio and ArgoCD
