@@ -104,9 +104,28 @@ Note: I was able to get this to work on my local python env but couldn't get it 
    * Have a ecr avaialabe to use
    * Have an OpenAI key (required for bot)
 
-### 1. Build and Push Image
- - use jenkins to build the docker image and push it to the ecr.
+### Build and Push Image
+  The whole project is maintained in git, when the code is updated two things happen. First, the user will build the image and push it to the ecr.  Along this build path, the code will go through checks and scans before being built, and then the image itself gets scanned.  Second, if ArgoCD is configured, it will detect the changes and automaticially update the pod structure on kubernetes to deploy the project.
+
+ - This is a listing of all the pipelines used for this project
+ ![Alt text](images/all-pipelines.png)
+
+ - Use the pipeline 'build-push-to-ecr' to build the docker image and initiate the gitOps pipeline.
+ ![Alt text](images/build-ecr.png)
+
+ - The build process will walk through the checks/scans
  ![Alt text](images/build-pipeline.png)
+ note: jobs were created to pass even if problems were found
+
+ - This is an example of checkov failing the check
+ ![Alt text](images/checkov-failure.png)
+
+ - This is an example of flake8 failing the check
+ ![Alt text](images/flake8-failure.png)
+
+- This is an example of trivy scan results
+ ![Alt text](images/trivy-scan.png)
+
 
 ### 2. Set Secrets
  - kubectl create secret generic openai-api-key \
