@@ -1,4 +1,4 @@
-# AI API Chat Interface
+# 🤖 AI API Chat Interface
 
 This project is a lightweight Flask-based web application that lets users interact with OpenAI's GPT-4 via a web form or a REST API. It is containerized with Docker and deployed using Kubernetes and Istio, supporting blue/green deployments through versioned subsets.
 
