@@ -6,6 +6,8 @@ This repository contains all components necessary to build and manage a modern c
 
 - 🐳 Docker + Kubernetes
 - 📈 Grafana + Prometheus monitoring
+-	🚀 ArgoCD for GitOps-based continuous delivery to Kubernetes
+- 🔁 Jenkins for CI pipelines and automated testing
 - 🛠️ Helm + Infrastructure as Code (IaC)
 - 🧩 Istio for advanced traffic routing (blue/green deployment)
 - 🗃️ MariaDB for persistent state
