@@ -127,18 +127,21 @@ Note: I was able to get this to work on my local python env but couldn't get it 
  ![Alt text](images/trivy-scan.png)
 
 
-### 2. Set Secrets
+### Set Secrets
+  For this project to work, there will need to be be serveral sercrets created in both Jenkins and within kubernetes itself.
+
+ - In Jenkins be sure to have your AWS key
+ ![Alt text](images/key.png)
+
+ Using this command and your openai-key create your secret
  - kubectl create secret generic openai-api-key \
    --from-literal=OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx \
    --namespace=default
 
 ### 3. Deploy Istio and ArgoCD
- - use the jenkins jobs to deploy Istio to the cluster
+ - use the jenkins jobs to deploy Istio and Argo to the cluster
   ![Alt text](images/istio-argo.png)
- - use the jenkins job to deploy ArgoCD to the cluster
 
 ### 4. Manage deployments with ArgoCD
  - access the argoCD UI from inside the cluster.
-    - the
-- This is an example of trivy scan results
  ![Alt text](images/ArgoCD.png)
