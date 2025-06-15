@@ -22,16 +22,19 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │       ├── secrets/            # Kubernetes secrets templates
 │   │       └── templates/          # Helm templates (deployment, service, gateway, etc.)
 │   ├── images/                     # (Optional) Container images or related assets
+│   │
 │   ├── jenkins/                    # Modular Jenkins pipelines for code quality and security
-│   │   ├── Jenkinsfile-checkov
+│   │
+│   │   ├── Jenkinsfile-checkov    # Runs scans on Terraform code for misconfigurations and security
 │   │   ├── Jenkinsfile-deploy
-│   │   ├── Jenkinsfile-ecr
-│   │   ├── Jenkinsfile-flake8
-│   │   ├── Jenkinsfile-hadolint
-│   │   ├── Jenkinsfile-pytest
-│   │   ├── Jenkinsfile-semgrep
-│   │   ├── Jenkinsfile-trivy
-│   │   └── Jenkinsfile-yamllint
+│   │   ├── Jenkinsfile-ecr        # Main job that builds and pushes the image for the app and initiates pipelines.
+│   │   ├── Jenkinsfile-flake8     # Performs Python linting and style checks and tests.
+│   │   ├── Jenkinsfile-hadolint   # Lints Dockerfile looking for best-practice violations and general issues.
+│   │   ├── Jenkinsfile-pytest     # Runs unit tests for the ai-api server.
+│   │   ├── Jenkinsfile-semgrep    # Static code analayzer, used to catch security and logic flaws in python.
+│   │   ├── Jenkinsfile-trivy      # Peforms an image scan to detect vulnerabilities in the container image.
+│   │   └── Jenkinsfile-yamllint   # Lints yaml files such as the Kubernetes manifests and Helm values.
+│   │
 │   ├── manifests/                  # Raw Kubernetes manifests (non-Helm)
 │   ├── requirements.txt            # Python dependencies
 │   ├── templates/                  # HTML templates for the app
