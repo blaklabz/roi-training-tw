@@ -5,7 +5,7 @@ This project is a lightweight Flask-based web application that lets users intera
 ---
 
 <pre>
-## 📁 Project Folder Structure
+📁 Project Folder Structure
 
 ```
 03-devops-capstone/
