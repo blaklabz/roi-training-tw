@@ -73,14 +73,5 @@ pipeline {
         '''
       }
     }
-
-    stage('Apply Istio Blue/Green Routing Rules') {
-      steps {
-        sh '''
-          kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f 03-devops-capstone/infra-pipelines/istio/destination-rule.yaml
-          kubectl --kubeconfig=${KUBECONFIG_PATH} apply -f 03-devops-capstone/infra-pipelines/istio/virtual-service.yaml
-        '''
-      }
-    }
   }
 }

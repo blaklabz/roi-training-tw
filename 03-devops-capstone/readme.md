@@ -24,12 +24,12 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │       └── templates/          # Helm templates (deployment, service, gateway, etc.)
 │   │        ├── _helpers.tpl       # resuable naming/labels
 │   │        ├── deployment.yaml    # defines the ai-api pods
-│   │        ├── destinationrule.yaml # controls the loadbalancing
+│   │        ├── destinationrule.yaml # controls the loadbalancing (istio)
 │   │        ├── gateway.yaml       # expose the istio service
 │   │        ├── service.yaml       # creates the istio service
-│   │        ├── virtualservice.yaml  # routing rules of the service v1/v2
+│   │        ├── virtualservice.yaml  # routing rules of the service v1/v2 (istio)
 │
-│   ├── images/                     # (Optional) Container images or related assets
+│   ├── images/                     # images for background
 │   │
 │   ├── jenkins/                    # Modular Jenkins pipelines for code quality and security
 │   │   │
@@ -50,9 +50,10 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │    ├── test_app.py           # tests for pytest
 │
 ├── infra-pipelines/                # Infrastructure CI/CD and deployment logic
-│   ├── istio/                      # Istio configuration (DestinationRule, VirtualService)
-│   ├── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
-│   └── terraform/                  # Infrastructure provisioning with Terraform
+│   └── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
+│   │    ├── Jenkinsfile-argocd    # Jenkins pipeline to install argoCD to the eks cluster
+│   │    ├── Jenkinsfile-istio     # Jenkins pipeline to install istio to the eks cluster
+│
 ├── readme.md                       # This file - project overview, usage, and instructions
 ```
 </pre>
