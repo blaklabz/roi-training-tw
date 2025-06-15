@@ -128,7 +128,7 @@ Note: I was able to get this to work on my local python env but couldn't get it 
 
 
 ### Set Secrets
-  For this project to work, there will need to be be serveral sercrets created in both Jenkins and within kubernetes itself.
+  For this project to work, the creation of two keys will needed.  One will be the AWS key, the other will need to be the openai key. Note: The openai key can also be set with the kubectl command.
 
  - In Jenkins be sure to have your AWS key
  ![Alt text](images/key.png)
@@ -138,10 +138,16 @@ Note: I was able to get this to work on my local python env but couldn't get it 
    --from-literal=OPENAI_API_KEY=sk-xxxxxxxxxxxxxxxxxxxx \
    --namespace=default
 
-### 3. Deploy Istio and ArgoCD
+### Deploy Istio and ArgoCD
  - use the jenkins jobs to deploy Istio and Argo to the cluster
   ![Alt text](images/istio-argo.png)
+ - Once Istio and Argo are on the cluster, the user should be able to pull the service endpoint from the istio namespace and access the application.
 
-### 4. Manage deployments with ArgoCD
+ kubectl get svc -n istio-system
+
+
+### Manage deployments with ArgoCD
  - access the argoCD UI from inside the cluster.
  ![Alt text](images/ArgoCD.png)
+ - The deployment of ArgoCD jenkins pipeline should automatically put in the applications (v1/v2) for argo to manage. Simply by updating the repository forces argoCD to sync and make the adjustments on the fly.  So if the virutal service was modified to have 90% of the traffic going to one app, then the other app would only get 10% of the traffic.
+ - ArgoCD also shows realtime metrics for the resources, so the virtualservice and gateways if shared between the apps will display as a warning.
