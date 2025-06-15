@@ -5,9 +5,9 @@ This project is a lightweight Flask-based web application that lets users intera
 ---
 
 <pre>
-## 📁 Project Structure
+## 📁 Project Folder Structure
 
-```text
+```
 03-devops-capstone/
 ├── ai-api/                         # Main application code and related configs
 │   ├── app.py                      # Flask API source code
