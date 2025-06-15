@@ -50,7 +50,7 @@ This project is a lightweight Flask-based web application that lets users intera
 │   │    ├── test_app.py           # tests for pytest
 │
 ├── infra-pipelines/                # Infrastructure CI/CD and deployment logic
-│   └── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
+│   └── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio)
 │   │    ├── Jenkinsfile-argocd    # Jenkins pipeline to install argoCD to the eks cluster
 │   │    ├── Jenkinsfile-istio     # Jenkins pipeline to install istio to the eks cluster
 │
@@ -58,14 +58,12 @@ This project is a lightweight Flask-based web application that lets users intera
 ```
 </pre>
 
-
 ---
 
 ## 🧠 Features
 
+- Jenkins pipelines that run checks/scans/tests then builds and pushes the image to ecr, then scans the image.
 - Flask web app with HTML form and OpenAI GPT-4 integration
-- `/` route: user-facing form interface
-- `/ask` route: JSON-based POST API for programmatic access
 - Kubernetes deployment with Helm and ArgoCD
 - Istio Gateway and VirtualService support blue/green traffic split
 - Secrets managed via Kubernetes for OpenAI API key
@@ -82,25 +80,18 @@ This project is a lightweight Flask-based web application that lets users intera
 - **ArgoCD**
 - **Istio Ingress Gateway**
 
+## 📦 Pipeline Stack
+
+- **Checkov** - Static analysis for Terraform/IaC https://www.checkov.io/
+- **Flake8** – Python linter & style enforcer https://flake8.pycqa.org/
+- **Hadolint** – Dockerfile best-practice linter https://github.com/hadolint/hadolint
+- **Pytest** – Python testing framework
+- **SemGrep** – Open‑source SAST (code analyzer) https://semgrep.dev/
+- **Trivy** – Container image vulnerability scanner https://trivy.dev/
+- **Yamllint**  – YAML syntax/style linter https://yamllint.readthedocs.io/
+
 ---
 
 ## 🚀 Deployment Overview
 
 ### 1. Build and Push Image
-
-Use Jenkins or manually run:
-
-```bash
-docker build --build-arg BACKGROUND_IMAGE=bg1.jpg -t <your-registry>/ai-api:v1 .
-docker push <your-registry>/ai-api:v1
-
-kubectl create secret generic openai-secret \
-  --from-literal=OPENAI_KEY=<your-api-key>
-
-helm upgrade --install ai-api ./charts/ai-api \
-    --set image.tag=v1 \
-    --set image.repository=<your-registry>/ai-api
-
-http://<istio-external-ip>/
-
-GET /healthz -> "OK"
