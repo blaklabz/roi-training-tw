@@ -29,4 +29,9 @@ This repository contains all components necessary to build and manage a modern c
      * build_local.sh - (an attempt at creating a repo in kubernetes to push too)
      * cluster.yaml
      * README.md
+  * 03-devops-capstone
+     * ai-api - (helm chart)
+     * images - readme-content
+     * infra-pipelines - istio/argoCD deployment yamls
+     * readme.md
 * README.md               <----- # You’re here!!!
