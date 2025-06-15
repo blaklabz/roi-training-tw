@@ -134,8 +134,11 @@ Note: I was able to get this to work on my local python env but couldn't get it 
 
 ### 3. Deploy Istio and ArgoCD
  - use the jenkins jobs to deploy Istio to the cluster
+  ![Alt text](images/istio-argo.png)
  - use the jenkins job to deploy ArgoCD to the cluster
 
 ### 4. Manage deployments with ArgoCD
  - access the argoCD UI from inside the cluster.
     - the
+- This is an example of trivy scan results
+ ![Alt text](images/ArgoCD.png)
