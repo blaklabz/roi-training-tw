@@ -77,7 +77,7 @@ This project is a lightweight Flask-based web application that lets users intera
 - **Docker**
 - **Kubernetes (EKS)**
 - **Helm**
-- **ArgoCD**
+- **ArgoCD** - https://github.com/argoproj/argo-cd https://argoproj.github.io/cd/
 - **Istio Ingress Gateway**
 
 ## 📦 Pipeline Stack
