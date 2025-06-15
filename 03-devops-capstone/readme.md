@@ -4,6 +4,10 @@ This project is a lightweight Flask-based web application that lets users intera
 
 ---
 
+<pre>
+## 📁 Project Structure
+
+```text
 03-devops-capstone/
 ├── ai-api/                         # Main application code and related configs
 │   ├── app.py                      # Flask API source code
@@ -38,6 +42,9 @@ This project is a lightweight Flask-based web application that lets users intera
 │   ├── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
 │   └── terraform/                  # Infrastructure provisioning with Terraform
 ├── readme.md                       # This file - project overview, usage, and instructions
+```
+</pre>
+
 
 ---
 
