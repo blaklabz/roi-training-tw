@@ -4,6 +4,43 @@ This project is a lightweight Flask-based web application that lets users intera
 
 ---
 
+03-devops-capstone/
+├── ai-api/                         # Main application code and related configs
+│   ├── app.py                      # Flask API source code
+│   ├── backend.tf                  # Terraform config for backend services
+│   ├── Dockerfile                  # Container definition for ai-api
+│   ├── helm/                       # Helm chart for ai-api deployment
+│   │   └── ai-api/
+│   │       ├── Chart.yaml          # Helm chart metadata
+│   │       ├── values.yaml         # Default Helm values
+│   │       ├── values-v1.yaml      # Helm values for version 1
+│   │       ├── values-v2.yaml      # Helm values for version 2
+│   │       ├── secrets/            # Kubernetes secrets templates
+│   │       └── templates/          # Helm templates (deployment, service, gateway, etc.)
+│   ├── images/                     # (Optional) Container images or related assets
+│   ├── jenkins/                    # Modular Jenkins pipelines for code quality and security
+│   │   ├── Jenkinsfile-checkov
+│   │   ├── Jenkinsfile-deploy
+│   │   ├── Jenkinsfile-ecr
+│   │   ├── Jenkinsfile-flake8
+│   │   ├── Jenkinsfile-hadolint
+│   │   ├── Jenkinsfile-pytest
+│   │   ├── Jenkinsfile-semgrep
+│   │   ├── Jenkinsfile-trivy
+│   │   └── Jenkinsfile-yamllint
+│   ├── manifests/                  # Raw Kubernetes manifests (non-Helm)
+│   ├── requirements.txt            # Python dependencies
+│   ├── templates/                  # HTML templates for the app
+│   └── tests/                      # App-level test code
+├── apps/                           # (Optional) Placeholder or future apps directory
+├── infra-pipelines/                # Infrastructure CI/CD and deployment logic
+│   ├── istio/                      # Istio configuration (DestinationRule, VirtualService)
+│   ├── jenkins/                    # Infra-level Jenkins pipelines (ArgoCD, Istio, destroy, etc.)
+│   └── terraform/                  # Infrastructure provisioning with Terraform
+├── readme.md                       # This file - project overview, usage, and instructions
+
+---
+
 ## 🧠 Features
 
 - Flask web app with HTML form and OpenAI GPT-4 integration
